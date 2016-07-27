@@ -1,0 +1,72 @@
+# depslib dependency file v1.0
+1469376316 source:/home/simone/workspace_C++/SDL_BGE/main.cpp
+	"BGE_Engine.h"
+
+1469447477 /home/simone/workspace_C++/SDL_BGE/include/BGE_Engine.h
+	<vector>
+	"BGE_Texture.h"
+	"BGE_Stickman.h"
+
+1469442648 /home/simone/workspace_C++/SDL_BGE/include/BGE_Texture.h
+	<SDL2/SDL.h>
+	<string>
+	<cstdint>
+
+1469612066 /home/simone/workspace_C++/SDL_BGE/include/BGE_Object.h
+	<SDL2/SDL.h>
+	<vector>
+	<BGE_2DVect.h>
+
+1469614183 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Engine.cpp
+	"BGE_Engine.h"
+	"BGE_Object.h"
+	"BGE_Timer.h"
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<SDL2/SDL_mixer.h>
+	<stdio.h>
+	<fstream>
+	<chrono>
+	<random>
+	<flags.h>
+
+1469353258 /home/simone/workspace_C++/SDL_BGE/include/BGE_Timer.h
+	<SDL2/SDL.h>
+	<stdint.h>
+
+1469614094 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Object.cpp
+	"BGE_Engine.h"
+	"BGE_Engine.h"
+	<vector>
+	<flags.h>
+
+1469442838 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Texture.cpp
+	"BGE_Texture.h"
+	"BGE_Engine.h"
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+
+1469357900 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Timer.cpp
+	"BGE_Timer.h"
+
+1469447657 /home/simone/workspace_C++/SDL_BGE/include/BGE_Stickman.h
+	<BGE_Object.h>
+
+1469614129 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Stickman.cpp
+	"BGE_Stickman.h"
+	"BGE_Engine.h"
+	<SDL2/SDL.h>
+	<SDL2/SDL_mixer.h>
+	<cmath>
+
+1469523643 /home/simone/workspace_C++/SDL_BGE/include/BGE_2DVect.h
+
+1469523684 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_2DVect.cpp
+	<BGE_2DVect.h>
+	<SDL2/SDL.h>
+	<cmath>
+
+1469524093 /home/simone/workspace_C++/SDL_BGE/include/flags.h
+

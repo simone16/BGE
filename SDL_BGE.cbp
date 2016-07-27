@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="SDL_BasicGameEngine" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="bin/Release/SDL_BasicGameEngine" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-std=c++11" />
+					<Add option="-Wfatal-errors" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="fnt/FreeMono.ttf" />
+		<Unit filename="fnt/FreeMonoBold.ttf" />
+		<Unit filename="img/stickman.png" />
+		<Unit filename="img/stickmanUmbrella.png" />
+		<Unit filename="include/BGE_2DVect.h" />
+		<Unit filename="include/BGE_Engine.h" />
+		<Unit filename="include/BGE_Object.h" />
+		<Unit filename="include/BGE_Stickman.h" />
+		<Unit filename="include/BGE_Texture.h" />
+		<Unit filename="include/BGE_Timer.h" />
+		<Unit filename="include/flags.h" />
+		<Unit filename="list" />
+		<Unit filename="main.cpp" />
+		<Unit filename="snd/muoio.wav" />
+		<Unit filename="snd/ouch.wav" />
+		<Unit filename="src/BGE_2DVect.cpp" />
+		<Unit filename="src/BGE_Engine.cpp" />
+		<Unit filename="src/BGE_Object.cpp" />
+		<Unit filename="src/BGE_Stickman.cpp" />
+		<Unit filename="src/BGE_Texture.cpp" />
+		<Unit filename="src/BGE_Timer.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

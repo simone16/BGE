@@ -1,21 +1,32 @@
 // Definition for this class
-#include "BGE_Engine.h"
+#include "BGE_Object.h"
 
 // Definitions of other classes in the project
 #include "BGE_Engine.h"
 
 #include <vector>
+#include <cmath>
+#include <algorithm>	//used for std::find
 
 // Contains global preprocessor defines.
 #include <flags.h>
 
 const float BGE_Object::SPEED = 240;
 BGE_Engine *BGE_Object::engine = NULL;
+const float BGE_Object::TWO_PI = 6.283185307;
+const float BGE_Object::DEGREE_OVER_RADIANS = 57.29577951;
 
-BGE_Object::BGE_Object() {
+BGE_Object::BGE_Object() : content(0) {
+	//Initialise interactions.
+	visible = true;
+	solid = true;
 	//Position and speed are initialised to 0,0.
 	//Direction initialisation.
 	angle = 0;
+	//Initialise collider:
+	colliderHeight = 0;
+	colliderWidth = 0;
+	setCollision(true);
 	//Initialise texture
 	texture = NULL;
 	//Initialise direction (facing right)
@@ -24,9 +35,30 @@ BGE_Object::BGE_Object() {
 
 BGE_Object::~BGE_Object() {}
 
-void BGE_Object::move( float Dt, std::vector<BGE_Object *> others ) {
+void BGE_Object::applySpeed(float Dt) {
 	position = position + (speed * Dt);
+}
 
+void BGE_Object::applyCollision(std::vector<BGE_Object*> &others) {
+	for ( int i = 0; i < others.size(); i++ ) {
+		if ( this != others[i] ) {
+			if (circularCollision(others[i])) {
+#ifdef DEBUG_COLLISION
+				printf("circular collision: %s\n", others[i]->type.getName().c_str());
+#endif // DEBUG
+				// Checks and avoids overlapping if both objs are solid.
+				BGE_2DVect overlap;
+				if ( boxCollision(others[i], &overlap)) {
+#ifdef DEBUG_COLLISION
+					printf("box collision: %s\n", others[i]->type.getName().c_str());
+#endif // DEBUG
+					interact(others[i], overlap);
+				}
+			}
+		}
+	}
+
+	//Keeps the object inside the window (temporary).
 	//If the dot went too far to the left or right
 	if( position.x < colliderWidth / 2 ) {
 		position.x = colliderWidth / 2;
@@ -44,185 +76,84 @@ void BGE_Object::move( float Dt, std::vector<BGE_Object *> others ) {
 	}
 }
 
-void BGE_Object::render() {
-	texture->render( position.x, position.y, flip, angle*57.29577951);
+void BGE_Object::setAsContent(bool content) {
+    visible = !content;
+    solid = !content;
+    setCollision( !content);
+    if (content) {
+		speed.x = 0;
+		speed.y = 0;
+    }
 }
 
-bool BGE_Object::circularCollision(BGE_Object* other) {
-    return (position - other->getPosition()).modulus() <= (colliderRadius + other->getCollisionRadius());
+void BGE_Object::add( BGE_Object *object) {
+	content.push_back(object);
+	object->setAsContent(true);
+}
+
+void BGE_Object::remove( BGE_Object *object) {
+	std::vector<BGE_Object *>::iterator objectIndex;
+	objectIndex = std::find(content.begin(), content.end(), object);
+	if ( objectIndex != content.end() ) {
+		object->setAsContent(false);
+		content.erase( objectIndex);
+	}
+}
+
+void BGE_Object::render() {
+	texture->render( position.x, position.y, flip, angle*DEGREE_OVER_RADIANS);
+
+}
+
+bool BGE_Object::circularCollision( BGE_Object* other) {
+	if (!collides || !other->canCollide()) {
+		return false;
+	}
+	else {
+		return (position - other->getPosition()).modulus() <= (getCollisionRadius() + other->getCollisionRadius());
+	}
 }
 
 int BGE_Object::getCollisionRadius() {
-	return colliderRadius;
+	return (std::sqrt( std::pow(colliderWidth, 2) + std::pow(colliderHeight, 2) )/2 + CIRCULAR_COLLISION_PADDING);
 }
 
-bool BGE_Object::boxCollision( BGE_Object *other, BGE_2DVect *collisionPoint, BGE_2DVect *correction ) {
-	std::vector<BGE_2DVect> thisBox = getCollisionBox();
-	std::vector<BGE_2DVect> otherBox = other->getCollisionBox();
+bool BGE_Object::boxCollision( BGE_Object *other, BGE_2DVect *correction) {
+	BGE_2DRect thisBox = getCollisionBox();
+	BGE_2DRect otherBox = other->getCollisionBox();
 
-	// Adjust correction so that it can be directly applied to this object's position (+)
-	// Or other object's position (-)
-	if (hasPointsInside( thisBox, otherBox, collisionPoint, correction )) {
-        if (correction != NULL) {
-			*correction = *correction*(-1.0);
-        }
-        return true;
-	}
-	else if (hasPointsInside( otherBox, thisBox, collisionPoint, correction )) {
+    if (thisBox.overlaps(otherBox)) {
+		if (correction != NULL) {
+			correction->x = 0;
+			correction->y = 0;
+			BGE_2DVect otherPosition = other->getPosition();
+			BGE_2DRect intersection = thisBox.intersection( otherBox);
+
+			if (intersection.w < intersection.h) {
+				if (position.x < otherPosition.x) {
+					correction->x = -intersection.w;
+				}
+				else {
+					correction->x = intersection.w;
+				}
+			}
+			else {
+				if (position.y < otherPosition.y) {
+					correction->y = -intersection.h;
+				}
+				else {
+					correction->y = intersection.h;
+				}
+			}
+		}
 		return true;
 	}
 	return false;
 }
 
-std::vector<BGE_2DVect> BGE_Object::getCollisionBox() {
-    std::vector<BGE_2DVect> corners (4);
-    //Calculate corners at angle=0, position=0,0
-    // NOTE: consecutive corners must be on the same side of the rectangle!!
-    //Upper left
-    corners[0].x = - colliderWidth/2;
-    corners[0].y = - colliderHeight/2;
-    //Upper right
-    corners[1].x = + colliderWidth/2;
-    corners[1].y = - colliderHeight/2;
-    //Bottom right
-    corners[2].x = + colliderWidth/2;
-    corners[2].y = + colliderHeight/2;
-    //Bottom left
-    corners[3].x = - colliderWidth/2;
-    corners[3].y = + colliderHeight/2;
-
-    for (Uint8 i=0; i<4; i++) {
-		//Rotate corners
-		float _modulus, _angle;
-		_modulus = corners[i].modulus();
-		_angle = corners[i].angle();
-        corners[i].setPolar(_modulus, _angle+angle);
-        //Translate to position
-		corners[i] = corners[i]+position;
-	}
-
-	return corners;
-}
-
-bool BGE_Object::hasPointsInside(const std::vector<BGE_2DVect> &rectangularRegion, const std::vector<BGE_2DVect> &pointsToCheck, BGE_2DVect *collisionPoint, BGE_2DVect *correction) {
-	bool pointIsInside = false;
-
-	//If two consecutive points have an identical coordinate => angle = pi/2*N (can't calculate m)
-	if (rectangularRegion[1].x == rectangularRegion[2].x || rectangularRegion[1].x == rectangularRegion[0].x ) {
-		//Sides of rectangularRegion (assumes consecutive vertices are consecutive)
-		float left,right,top,bottom;
-		if (rectangularRegion[0].x < rectangularRegion[2].x) {
-			left = rectangularRegion[0].x;
-			right = rectangularRegion[2].x;
-		}
-		else {
-			left = rectangularRegion[2].x;
-			right = rectangularRegion[0].x;
-		}
-		if (rectangularRegion[0].y < rectangularRegion[2].y) {
-			top = rectangularRegion[2].y;
-			bottom = rectangularRegion[0].y;
-		}
-		else {
-			top = rectangularRegion[2].y;
-			bottom = rectangularRegion[0].y;
-		}
-
-		//For each point in pointsToCheck, checks whether it is inside rectangularRegion.
-		for (Uint8 i=0; i<4; i++) {
-			if ( pointsToCheck[i].x <= right &&
-					pointsToCheck[i].x >= left &&
-					pointsToCheck[i].y <= top &&
-					pointsToCheck[i].y >= bottom ) {
-				if (collisionPoint != NULL) {
-					// Detects nearest edge, collision point is on this edge and on edgeToPoint distance.
-                    if (right - pointsToCheck[i].x < pointsToCheck[i].x - left) {
-						if (top - pointsToCheck[i].y < pointsToCheck[i].y - bottom) {
-							if (right - pointsToCheck[i].x < top - pointsToCheck[i].y) {
-								collisionPoint->x = right;
-								collisionPoint->y = pointsToCheck[i].y;
-							}
-							else {
-								collisionPoint->x = pointsToCheck[i].x;
-								collisionPoint->y = top;
-							}
-						}
-						else {
-							if (right - pointsToCheck[i].x < pointsToCheck[i].y - bottom) {
-								collisionPoint->x = right;
-								collisionPoint->y = pointsToCheck[i].y;
-							}
-							else {
-								collisionPoint->x = pointsToCheck[i].x;
-								collisionPoint->y = bottom;
-							}
-						}
-                    }
-                    else {
-						if (top - pointsToCheck[i].y < pointsToCheck[i].y - bottom) {
-							if (pointsToCheck[i].x - left < top - pointsToCheck[i].y) {
-								collisionPoint->x = left;
-								collisionPoint->y = pointsToCheck[i].y;
-							}
-							else {
-								collisionPoint->x = pointsToCheck[i].x;
-								collisionPoint->y = top;
-							}
-						}
-						else {
-							if (pointsToCheck[i].x - left < pointsToCheck[i].y - bottom) {
-								collisionPoint->x = left;
-								collisionPoint->y = pointsToCheck[i].y;
-							}
-							else {
-								collisionPoint->x = pointsToCheck[i].x;
-								collisionPoint->y = bottom;
-							}
-						}
-                    }
-					*correction = pointsToCheck[i] - *collisionPoint;
-				}
-				pointIsInside = true;
-				break;
-			}
-		}
-	}
-	else {
-		//y=mx+q; for each side of rectangularRegion.
-		float m[4],q[4];
-		for (Uint8 i=0; i<4; i++) {
-			Uint8 j = i+1;
-			if (j>=4) {
-				j=0;
-			}
-			m[i] = (rectangularRegion[i].y-rectangularRegion[j].y)/(rectangularRegion[i].x-rectangularRegion[j].x);
-			q[i] = rectangularRegion[i].y - rectangularRegion[i].x*m[i];
-		}
-
-		//Arranges sides 0 and 1 to be respectively higher (y) than 2 and 3.
-		if (q[0] < q[2]) {
-			float tmp = q[2];
-			q[2] = q[0];
-			q[0] = tmp;
-		}
-		if (q[1] < q[3]) {
-			float tmp = q[3];
-			q[3] = q[1];
-			q[1] = tmp;
-		}
-
-		//For each point in pointsToCheck, checks whether it is inside rectangularRegion.
-		for (Uint8 i=0; i<4; i++) {
-			if ( (pointsToCheck[i].y <= pointsToCheck[i].x*m[0]+q[0] &&
-					pointsToCheck[i].y >= pointsToCheck[i].x*m[2]+q[2] &&
-					pointsToCheck[i].y <= pointsToCheck[i].x*m[1]+q[1] &&
-					pointsToCheck[i].y >= pointsToCheck[i].x*m[3]+q[3]) ) {
-				pointIsInside = true;
-				break;
-			}
-		}
-	}
-	return pointIsInside;
+BGE_2DRect BGE_Object::getCollisionBox() {
+	BGE_2DRect collisionBox ( position.x-colliderWidth/2, position.y-colliderHeight/2, colliderWidth, colliderHeight);
+	return collisionBox;
 }
 
 void BGE_Object::setTexture( BGE_Texture *ntexture ) {
@@ -248,4 +179,34 @@ void BGE_Object::setSpeed( float x, float y ) {
 	else {
 		flip = SDL_FLIP_HORIZONTAL;
 	}
+}
+
+BGE_2DVect BGE_Object::getSpeed() {
+	return speed;
+}
+
+void BGE_Object::setAngle(float _angle) {
+	while (_angle > TWO_PI) {
+		_angle -= TWO_PI;
+	}
+	while (_angle < 0) {
+		_angle += TWO_PI;
+	}
+	angle = _angle;
+}
+
+void BGE_Object::setCollision(bool _collides) {
+    collides = _collides;
+}
+
+bool BGE_Object::canCollide() {
+	return collides;
+}
+
+bool BGE_Object::isVisible() {
+	return visible;
+}
+
+bool BGE_Object::isSolid() {
+	return solid;
 }

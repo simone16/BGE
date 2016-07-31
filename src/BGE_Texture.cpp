@@ -17,6 +17,8 @@ BGE_Texture::BGE_Texture() {
 	sheetHeight = 0;
 	width = 0;
 	height = 0;
+	offsetX = 0;
+    offsetY = 0;
 }
 
 BGE_Texture::~BGE_Texture() {
@@ -61,14 +63,26 @@ bool BGE_Texture::loadFromFile( std::string path, int keyRed, int keyGreen, int 
 		SDL_FreeSurface( loadedSurface );
 	}
 
-	//Return success
 	texture = newTexture;
+
+	//Return success
 	return texture != NULL;
 }
 
 void BGE_Texture::setSpriteSize(int nwidth, int nheight) {
 	width = nwidth;
 	height = nheight;
+	setSpriteOffset(0,0);
+}
+
+void BGE_Texture::setSpriteOffset(int x, int y) {
+    offsetX = x - width / 2;
+    offsetY = y - height / 2;
+}
+
+BGE_2DVect BGE_Texture::getSpriteOffset() {
+	BGE_2DVect offset (offsetX, offsetY);
+	return offset;
 }
 
 bool BGE_Texture::loadFromRenderedText( std::string textureText, Uint8 red, Uint8 green, Uint8 blue ) {
@@ -134,17 +148,25 @@ void BGE_Texture::setAlpha( Uint8 alpha ) {
 	SDL_SetTextureAlphaMod( texture, alpha );
 }
 
-void BGE_Texture::render( int x, int y, SDL_RendererFlip flip, double angle, SDL_Point *center ) {
-	//Rendering area on screen (x,y refer to sprite's center).
-	SDL_Rect screenClip = { x - sheetWidth / 2, y - sheetHeight / 2, sheetWidth, sheetHeight };
+void BGE_Texture::render( float x, float y, SDL_RendererFlip flip, double angle, SDL_Point *center ) {
+	//Apply viewport offset.
+    BGE_2DVect position = -(engine->getViewportOffset());
+    position.x += x-sheetWidth/2;
+    position.y += y-sheetHeight/2;
+	//Rendering area on screen.
+	SDL_Rect screenClip = {int(position.x), int(position.y), sheetWidth, sheetHeight };
 	//Render to screen
 	SDL_RenderCopyEx( BGE_Texture::engine->getRenderer(), texture, NULL, &screenClip, angle, center, flip );
 }
 
-void BGE_Texture::renderSprite( int x, int y, int sheetColumn, int sheetRow, SDL_RendererFlip flip, double angle, SDL_Point *center ) {
-	//Rendering area on screen (x,y refer to sprite's center).
-	SDL_Rect screenClip = { x - width / 2, y - height / 2, width, height };
-	//Area to blit from the sheet
+void BGE_Texture::renderSprite( float x, float y, int sheetColumn, int sheetRow, SDL_RendererFlip flip, double angle, SDL_Point *center ) {
+	//Apply viewport offset.
+	BGE_2DVect position = -(engine->getViewportOffset());
+	position.x += x+offsetX;
+    position.y += y+offsetY;
+	//Rendering area on screen.
+	SDL_Rect screenClip = {int(position.x), int(position.y), width, height };
+	//Area to blit from in the sheet.
     SDL_Rect sheetClip = {sheetColumn * width, sheetRow * height, width, height};
 	//Render to screen
 	SDL_RenderCopyEx( BGE_Texture::engine->getRenderer(), texture, &sheetClip, &screenClip, angle, center, flip );

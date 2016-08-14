@@ -16,6 +16,8 @@ class BGE_2DVect {
 	BGE_2DVect operator + ( const BGE_2DVect ) const;
 	BGE_2DVect operator - ( const BGE_2DVect ) const;
 	BGE_2DVect& operator - ();
+	BGE_2DVect& operator += ( const BGE_2DVect );
+	BGE_2DVect& operator -= ( const BGE_2DVect );
 	BGE_2DVect operator * ( const double ) const;
 	float modulus() const;
 	float angle() const;

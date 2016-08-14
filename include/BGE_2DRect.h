@@ -25,6 +25,10 @@ class BGE_2DRect {
         bool contains( BGE_2DRect &otherRect );
         //Returns intersection rectangle.
         BGE_2DRect intersection( BGE_2DRect &otherRect );
+        //Returns intersection segment from segment AB~ (false if no intersection is found).
+        bool intersection(const BGE_2DVect &A, const BGE_2DVect &B,  BGE_2DVect &intersectionA, BGE_2DVect &intersectionB );
+        //Returns diagonal.
+        float diagonal();
     protected:
     private:
 };

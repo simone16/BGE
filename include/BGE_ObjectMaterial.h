@@ -5,16 +5,9 @@
 
 class BGE_ObjectMaterial {
     public:
-        enum class PhysicalState : int {
-			HARD_SOLID,
-			SOFT_SOLID,
-			LIQUID,
-			GAS,
-			PLASMA,
-			TOT
-		};
+        static const float LITERS_PER_CUBIC_PX;
 
-        enum class Material : int {
+        enum Material : int {
 			FLESH,
 			BONE,
 			IRON,
@@ -27,21 +20,37 @@ class BGE_ObjectMaterial {
 			TOT
 		};
 
-		Material material;
-        PhysicalState state;
+		enum class PhysicalState : int {
+			HARD_SOLID,
+			SOFT_SOLID,
+			LIQUID,
+			GAS,
+			TOT
+		};
 
-        BGE_ObjectMaterial();
+		//Used to hold the values associated with each material.
+        struct MaterialData {
+            std::string name;
+            PhysicalState state;
+            float density;      // [kg/px3]
+            float nutrition;     // [HP/kg] negative -> toxic.
+        };
+
+		Material materialCode;
+
+        BGE_ObjectMaterial( Material _materialCode);
         virtual ~BGE_ObjectMaterial();
 
-        Material getMaterial();
+        //This function has to be called before using any object of this class.
+        static void init();
+
+        std::string getName();
         PhysicalState getState();
         float getDensity();
-        float getToxicity();
-        std::string getName();
-        std::string getMaterialName();
-        std::string getStateName();
+        float getNutrition();
     protected:
     private:
+        static MaterialData dataOf[TOT];
 };
 
 #endif // BGE_OBJECTMATERIAL_H

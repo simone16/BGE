@@ -39,6 +39,18 @@ BGE_2DVect& BGE_2DVect::operator-() {
     return *this;
 }
 
+BGE_2DVect& BGE_2DVect::operator+=( const BGE_2DVect addendum ) {
+    x += addendum.x;
+    y += addendum.y;
+    return *this;
+}
+
+BGE_2DVect& BGE_2DVect::operator-=( const BGE_2DVect addendum ) {
+    x -= addendum.x;
+    y -= addendum.y;
+    return *this;
+}
+
 BGE_2DVect BGE_2DVect::operator*( const double factor ) const {
 	BGE_2DVect result;
 	result.x = x * factor;

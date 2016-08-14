@@ -2,6 +2,8 @@
 
 #include <BGE_2DVect.h>
 
+#include <cmath>
+
 #include <stdio.h>
 
 BGE_2DRect::BGE_2DRect() {
@@ -61,4 +63,81 @@ BGE_2DRect BGE_2DRect::intersection( BGE_2DRect &otherRect ) {
         intersection.h = y+h-intersection.y;
     }
     return intersection;
+}
+
+bool BGE_2DRect::intersection(const BGE_2DVect& A, const BGE_2DVect& B, BGE_2DVect& intersectionA, BGE_2DVect& intersectionB ) {
+    //Check rectangle is inside segment.
+    if (A.x <= B.x) {
+        if (x+w < A.x || x > B.x) {
+            return false;
+        }
+    }
+    else {
+        if (x+w < B.x || x > A.x) {
+            return false;
+        }
+    }
+    if (A.y <= B.y) {
+        if (y+h < A.y || y > B.y) {
+            return false;
+        }
+    }
+    else {
+        if (y+h < B.y || y > A.y) {
+            return false;
+        }
+    }
+    //Compute intersection points.
+    bool foundOne = false;
+    //Segment is in the form y=mx+q;
+    float m = (B.y-A.y)/(B.x-A.x);
+    float q = B.y-m*B.x;
+    if ((m*x+q) <= (y+h) && (m*x+q) >= y) {
+        //Intersects left side.
+        intersectionA.x = x;
+        intersectionA.y = (m*x+q);
+        foundOne = true;
+    }
+    if ((m*(x+w)+q) <= (y+h) && (m*(x+w)+q) >= y) {
+        //Intersects right side.
+        if (foundOne) {
+            intersectionB.x = x+w;
+            intersectionB.y = (m*(x+w)+q);
+            return true;
+        }
+        else {
+            intersectionA.x = x+w;
+            intersectionA.y = (m*(x+w)+q);
+            foundOne = true;
+        }
+    }
+    if ((y-q)/m <= x+w && (y-q)/m >= x) {
+        //Intersects top side.
+        if (foundOne) {
+            intersectionB.x = (y-q)/m;
+            intersectionB.y = y;
+            return true;
+        }
+        else {
+            intersectionA.x = (y-q)/m;
+            intersectionA.y = y;
+            foundOne = true;
+        }
+    }
+    if ((y+h-q)/m <= x+w && (y+h-q)/m >= x) {
+        //Intersects bottom side.
+        if (foundOne) {
+            intersectionB.x = (y+h-q)/m;
+            intersectionB.y = y+h;
+            return true;
+        }
+        else {
+            printf("Problem!! \n");
+        }
+    }
+    return false;
+}
+
+float BGE_2DRect::diagonal() {
+    return std::sqrt(w*w+h*h);
 }

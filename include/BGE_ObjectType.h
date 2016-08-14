@@ -1,7 +1,8 @@
 #ifndef BGE_OBJECTTYPE_H
 #define BGE_OBJECTTYPE_H
 
-#include <BGE_ObjectMaterial.h>
+#include <BGE_2DRect.h>
+#include <string>
 
 class BGE_Engine;
 
@@ -9,7 +10,7 @@ class BGE_ObjectType {
     public:
         static BGE_Engine *engine;
 
-        enum class Type : int {
+        enum Type : int {
             BARREL,
             BLOCK,
             BOTTLE,
@@ -23,6 +24,7 @@ class BGE_ObjectType {
             STONE,
             SWORD,
             TABLE,
+            TILE,
             TOT
         };
 
@@ -37,24 +39,33 @@ class BGE_ObjectType {
             NONE            //Not directly usable.
         };
 
-        Type type;
-        BGE_ObjectMaterial material;
+        //Used to hold the values associated with each type.
+        struct TypeData {
+            std::string name;
+            Use use;        //player.use() section.
+            float depth;    //z axis, used for volume [px].
+            float width;    //used for collision [px]
+            float height;   //used for collision [px]
+        };
 
-        BGE_ObjectType();
+        Type typeCode;
+
+        BGE_ObjectType(Type _typeCode);
         virtual ~BGE_ObjectType();
 
+        //To be called before using any object of this class.
+        static void init();
+
         void setRandom();
-        Type getType();
-        Use getUse();
-        BGE_ObjectMaterial getMaterial();
-        float getVolume();
-        float getMass();
-        float getToxicity();
-        bool canMove();
+
         std::string getName();
-        std::string getTypeName();
+        Use getUse();
+        float getVolume();
+        BGE_2DRect getBox();
+        bool canMove();
     protected:
     private:
+        static TypeData dataOf[TOT];
 };
 
 #endif // BGE_OBJECTTYPE_H

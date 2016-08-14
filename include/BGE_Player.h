@@ -1,10 +1,16 @@
 #ifndef BGE_PLAYER_H
 #define BGE_PLAYER_H
 
-#include <BGE_Object.h>
+#include <BGE_Mover.h>
 
-class BGE_Player : public BGE_Object {
+class BGE_Player : public BGE_Mover {
     public:
+        //Can carry objects smaller than... [px3].
+        static const float POCKETS_VOLUME;
+        //Can move objects lighter than... [kg].
+        static const float MOVE_WEIGHT_THRESHOLD;
+        //Throwing energy [kg*px2/s].
+        static const float THROW_ENERGY;
         // How many times each animation frame is repeated.
         static const int FRAME_REPEAT = 5;
         static Mix_Chunk *woundFx;
@@ -30,18 +36,15 @@ class BGE_Player : public BGE_Object {
 
 		void render();
 
-        //Performs a walking routine
-		void walk();
-
-		void applySpeed(float Dt);
+		void update(float Dt);
 		void interact(BGE_Object * other, BGE_2DVect overlap);
-		void use(BGE_Object *object);
+		void use();
+		void dispose();
 		//Reduces HPs.
 		void wound( int damage );
 
 		void move(float Dt, std::vector<BGE_Object *> others);
 
-		void setSpeed(float x, float y);
         //Uses stored mouse position to adjust the angle;
 		void updateAngle();
 
@@ -55,9 +58,6 @@ class BGE_Player : public BGE_Object {
         BGE_Object *activeItem;
 
         BGE_2DVect mousePositionOnScreen;
-
-        Uint8 animationCtr;
-        Uint8 attackAnimationCtr;
 };
 
-#endif // BGE_STICKMAN_H
+#endif // BGE_PLAYER_H

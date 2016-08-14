@@ -1,10 +1,10 @@
 #ifndef BGE_ITEM_H
 #define BGE_ITEM_H
 
-#include <BGE_Object.h>
+#include <BGE_Mover.h>
 #include <BGE_2DVect.h>
 
-class BGE_Item : public BGE_Object {
+class BGE_Item : public BGE_Mover {
     public:
         //The fraction of speed loss 0<DRAG<1 [1/s].
         static const float DRAG;
@@ -14,11 +14,13 @@ class BGE_Item : public BGE_Object {
         BGE_Item();
         virtual ~BGE_Item();
 
-        void applySpeed(float Dt);
+        void update(float Dt);
 
         void interact( BGE_Object * other, BGE_2DVect overlap);
 
         void render();
+
+        void setAngle(float angle);
     protected:
     private:
 };

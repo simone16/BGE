@@ -1,122 +1,43 @@
 #include "BGE_ObjectMaterial.h"
 
-BGE_ObjectMaterial::BGE_ObjectMaterial() {}
+//Assumes 25px -> 0.5m
+const float BGE_ObjectMaterial::LITERS_PER_CUBIC_PX = 1/(8*156.25);
+
+BGE_ObjectMaterial::MaterialData BGE_ObjectMaterial::dataOf[TOT];
+
+BGE_ObjectMaterial::BGE_ObjectMaterial( Material _materialCode) {
+    materialCode = _materialCode;
+}
 
 BGE_ObjectMaterial::~BGE_ObjectMaterial() {}
 
-BGE_ObjectMaterial::Material BGE_ObjectMaterial::getMaterial() {
-    return material;
-}
-
-BGE_ObjectMaterial::PhysicalState BGE_ObjectMaterial::getState() {
-    return state;
-}
-
-float BGE_ObjectMaterial::getDensity() {
-    float density = 1;
-    switch (material) {
-        case Material::FLESH:
-            density = 1;
-            break;
-		case Material::BONE:
-            density = 0.5;
-            break;
-		case Material::IRON:
-            density = 50;
-            break;
-		case Material::PINEWOOD:
-            density = 0.5;
-            break;
-		case Material::MARBLE:
-            density = 10;
-            break;
-		case Material::FIBERGLASS:
-            density = 0.2;
-            break;
-		case Material::DRUG:
-            density = 0.5;
-            break;
-		case Material::WATER:
-            density = 1;
-            break;
-		case Material::FABRIC:
-            density = 0.1;
-            break;
-		default:
-            printf("No defined density for material: %i\n", material);
-            break;
-    }
-    return density;
-}
-
-float BGE_ObjectMaterial::getToxicity() {
-    //Negative value => good for you!
-    switch (material) {
-        case Material::FLESH:
-            return -1.0;
-        case Material::BONE:
-            return 0.5;
-        case Material::IRON:
-            return 1.0;
-        case Material::PINEWOOD:
-            return 0.2;
-        case Material::MARBLE:
-            return 1.0;
-        case Material::FIBERGLASS:
-            return 1.5;
-        case Material::DRUG:
-            return -0.2;
-        case Material::WATER:
-            return -0.5;
-        case Material::FABRIC:
-            return 0.0;
-        default:
-            return 0.0;
-    }
+void BGE_ObjectMaterial::init() {
+    //                   name       state                     density nutrition
+    dataOf[FLESH] =     {"flesh",   PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX,1.0};
+    dataOf[BONE] =      {"bone",    PhysicalState::HARD_SOLID   ,0.7*LITERS_PER_CUBIC_PX,0.1};
+    dataOf[IRON] =      {"iron",    PhysicalState::HARD_SOLID   ,7.9*LITERS_PER_CUBIC_PX,-0.5};
+    dataOf[PINEWOOD] =  {"pine wood",PhysicalState::HARD_SOLID  ,0.5*LITERS_PER_CUBIC_PX,-0.1};
+    dataOf[MARBLE] =    {"marble",  PhysicalState::HARD_SOLID   ,2.7*LITERS_PER_CUBIC_PX,-1.0};
+    dataOf[FIBERGLASS] = {"fiberglass",PhysicalState::HARD_SOLID,2.0*LITERS_PER_CUBIC_PX,-2.0};
+    dataOf[DRUG] =      {"drugs",   PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX,0.0};
+    dataOf[WATER] =     {"water",   PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX,0.5};
+    dataOf[FABRIC] =    {"fabric",  PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX,0.1};
 }
 
 std::string BGE_ObjectMaterial::getName() {
-    return getStateName() + " " + getMaterialName();
+    return dataOf[materialCode].name;
 }
 
-std::string BGE_ObjectMaterial::getMaterialName() {
-    switch (material) {
-        case Material::FLESH:
-            return "flesh";
-		case Material::BONE:
-            return "bone";
-		case Material::IRON:
-            return "iron";
-		case Material::PINEWOOD:
-            return "pine wood";
-		case Material::MARBLE:
-            return "marble";
-		case Material::FIBERGLASS:
-            return "fiberglass";
-		case Material::DRUG:
-            return "drugs";
-		case Material::WATER:
-            return "water";
-		case Material::FABRIC:
-            return "fabric";
-		default:
-            return "unknown";
-    }
+BGE_ObjectMaterial::PhysicalState BGE_ObjectMaterial::getState() {
+    return dataOf[materialCode].state;
 }
 
-std::string BGE_ObjectMaterial::getStateName() {
-    switch (state) {
-        case PhysicalState::HARD_SOLID:
-            return "solid";
-        case PhysicalState::SOFT_SOLID:
-            return "soft";
-        case PhysicalState::LIQUID:
-            return "liquid";
-        case PhysicalState::GAS:
-            return "gaseous";
-        case PhysicalState::PLASMA:
-            return "plasma";
-        default:
-            return "unknown";
-    }
+float BGE_ObjectMaterial::getDensity() {
+    return dataOf[materialCode].density;
 }
+
+float BGE_ObjectMaterial::getNutrition() {
+    return dataOf[materialCode].nutrition;
+}
+
+

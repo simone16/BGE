@@ -38,7 +38,7 @@ class BGE_Engine {
 		//Preps SDL for usage.
 		bool init();
 
-		//Reads external resources (text, images and audio) to ram.
+		//Reads external resources (text, images and audio) and level.
 		bool load();
 
 		//Executes the game itself.
@@ -48,9 +48,6 @@ class BGE_Engine {
 		//Mainly used to release memory (complementary to load()).
 		void close();
 
-		//Handle the rendering list. (TODO unused)
-		void show(BGE_Object *object);
-		void hide(BGE_Object *object);
 		//Returns the renderer to use for displaying textures on screen.
 		SDL_Renderer * getRenderer();
 		//Returns the default font of the game (used to create textures from text).
@@ -58,10 +55,22 @@ class BGE_Engine {
 		//Returns the offset to apply to sprites positions.
 		BGE_2DVect getViewportOffset();
 
-		//Returns a list of all the loaded objects.
-        std::vector<BGE_Object *> getOthers();
+		//Returns a list of loaded collideable objects.
+        std::vector<BGE_Object *> getCollidingObjects();
+        //Add an object to the current level.
+        void add(BGE_Object * object);
+        //Removes an object from the current level.
+        void remove(BGE_Object * object);
+        //Applies the changes queued with add and remove.
+        void updateVectors();
 
-		int getRandom(int min, int max);
+        //Functions for random numbers generation.
+		int getRandomInt(int min, int max);
+		float getRandomFloat(float min, float max);
+		float getNormalRandom(float mean, float stddev);
+
+		 BGE_Texture splintersSheet;
+		 BGE_Texture stickmanSheet, itemSheet;
 	protected:
 	private:
 		SDL_Window *window;
@@ -71,22 +80,27 @@ class BGE_Engine {
 		bool useJoystick;
 		BGE_2DVect viewportOffset;
 
-		BGE_Texture stickmanSheet, itemSheet;
 		BGE_Texture textTest;
 		Mix_Chunk *ouchFx, *muoioFx;
 
-		BGE_Player dot;
-		BGE_Item it1, it2, it3, it4, it5;
-		//Objects present in the level (TODO will be vector<BGE_Object>)
-		std::vector<BGE_Object *> loadedObjects;
+		//Player in the current level.
+		BGE_Player * player;
+		std::vector<BGE_Object *> items;
+		std::vector<BGE_Object *> tiles;
+		std::vector<BGE_Object *> effects;
 		//Objects inside the current viewport.
 		std::vector<BGE_Object *> visibleObjects;
+		//Used to manipulate objects in runtime.
+		std::vector<BGE_Object *> toAdd;
+		std::vector<BGE_Object *> toRemove;
 
 		std::default_random_engine randomGen;
 
 		BGE_2DRect getFreeMoveArea();
 		BGE_2DRect getViewport();
 		static bool compareRenderLevel(BGE_Object *front, BGE_Object *back);
+
+		void loadBuilding(int x, int y, int w, int h, BGE_Object::Material material);
 };
 
 #endif // GAME_H

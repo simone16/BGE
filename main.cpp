@@ -1,5 +1,8 @@
 #include "BGE_Engine.h"
 
+#include <iostream>
+#include <random>
+
 int main() {
 	BGE_Engine game;
 

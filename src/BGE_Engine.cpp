@@ -8,6 +8,7 @@
 #include <BGE_Object.h>
 #include <BGE_Timer.h>
 #include <BGE_2DRect.h>
+#include <BGE_Tile.h>
 
 // External includes
 #include <SDL2/SDL.h>       //SDL library
@@ -20,34 +21,19 @@
 #include <chrono>
 #include <algorithm>	//used for std::find and std::sort
 
+
 // Contains global preprocessor defines.
 #include <flags.h>
 
 const float BGE_Engine::FREE_MOVE_ZONE = 0.5;
 
-BGE_Engine::BGE_Engine() : loadedObjects( 6 ), visibleObjects( 6 ) {
-	//Initialise random number generator.
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	randomGen.seed(seed);
-
+BGE_Engine::BGE_Engine() {
 	//Initialise pointers.
 	window = NULL;
 	renderer = NULL;
 	joystick = NULL;
 	BGE_Object::engine = this;
-	BGE_ObjectType::engine = this;
-
-	dot.setPosition( 50, 50);
-	it1.setPosition( 100, 20 );
-	it1.type.setRandom();
-	it2.setPosition( 500, 100 );
-	it2.type.setRandom();
-	it3.setPosition( 70, 150 );
-	it3.type.setRandom();
-	it4.setPosition( 500, 300 );
-	it4.type.type = BGE_ObjectType::Type::GUN;
-	it5.setPosition( 10, 420 );
-	it5.type.type = BGE_ObjectType::Type::BULLETS;
+	player = NULL;
 }
 
 BGE_Engine::~BGE_Engine() {}
@@ -81,7 +67,7 @@ bool BGE_Engine::init() {
 		}
 
 		//Create window
-		window = SDL_CreateWindow( "Angry man", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		window = SDL_CreateWindow( "Culo Culo", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 
 		if( window == NULL ) {
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -122,6 +108,13 @@ bool BGE_Engine::init() {
 		}
 	}
 
+	//Initialise random number generator.
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	randomGen.seed(seed);
+
+	//Initialising game objects data.
+	BGE_Object::init();
+
 	return success;
 }
 
@@ -147,6 +140,14 @@ bool BGE_Engine::load() {
 		itemSheet.setSpriteSize( 25, 50);
 		itemSheet.setSpriteOffset(0, -12);
 	}
+	if( !splintersSheet.loadFromFile( "img/splinters.png" ) ) {
+		printf( "Failed to load items splinters!\n" );
+		success = false;
+	}
+	else {
+		splintersSheet.setSpriteSize( 25, 25);
+		splintersSheet.setSpriteOffset(0, -12);
+	}
 
 	//Load text
 	std::ifstream inputListFile ( "list" );
@@ -165,7 +166,7 @@ bool BGE_Engine::load() {
 		success = false;
 	}
 	else {
-		if ( !textTest.loadFromRenderedText( lines[getRandom(0, ctr-1)], 0, 0, 0 ) ) {
+		if ( !textTest.loadFromRenderedText( lines[getRandomInt(0, ctr-1)], 0, 0, 0 ) ) {
 			printf( "Failed to load texture from text.\n" );
 			success = false;
 		}
@@ -186,15 +187,48 @@ bool BGE_Engine::load() {
 		success = false;
 	}
 
-	dot.setSoundFxs( ouchFx, muoioFx );
+	//Load level.
+	//Load player.
+    player = new BGE_Player;
+    player->position.x = 50;
+    player->position.y = 50;
+    player->type = BGE_Object::CREATURE;
+    player->material = BGE_Object::Material::FLESH;
+    player->texture = &stickmanSheet;
 
-	//Assign textures
-	dot.setTexture( &stickmanSheet );
-	it1.setTexture( &itemSheet );
-	it2.setTexture( &itemSheet );
-	it3.setTexture( &itemSheet );
-	it4.setTexture( &itemSheet );
-	it5.setTexture( &itemSheet );
+    //Load some random objects.
+    for (int i=0; i<30; i++) {
+        BGE_Item *item = new BGE_Item;
+        item->position.x = getRandomInt(0, 1000);
+        item->position.y = getRandomInt(0, 500);
+        item->type = static_cast<BGE_Object::Type>(getRandomInt(0, BGE_Object::TOT-1));
+        item->material = static_cast<BGE_Object::Material>(getRandomInt(0, static_cast<int>(BGE_Object::Material::TOT)-1));
+        item->texture = &itemSheet;
+        items.push_back(item);
+    }
+    //Load some rooms.
+    for (int i=0; i<5; i++) {
+        loadBuilding(i*8, 0, 7, 7, BGE_Object::Material::PINEWOOD);
+    }
+	//Load some testing items.
+	BGE_Item *item = new BGE_Item;
+	item->position.x = 50;
+	item->position.y = 200;
+	item->type = BGE_Object::BARREL;
+	item->material = BGE_Object::Material::PINEWOOD;
+	item->texture = &itemSheet;
+	items.push_back(item);
+	for (int i=0; i<7; i++) {
+        BGE_Item *item2 = new BGE_Item;
+        item2->position.x = getRandomInt(0, 1000);
+        item2->position.y = getRandomInt(0, 500);
+        item2->type = BGE_Object::STONE;
+        item2->material = BGE_Object::Material::MARBLE;
+        item2->texture = &itemSheet;
+        items.push_back(item2);
+        item->add(item2);
+    }
+	//dot.setSoundFxs( ouchFx, muoioFx );
 
 	return success;
 }
@@ -210,29 +244,14 @@ void BGE_Engine::start() {
 	BGE_Timer FPStimer;
 	FPStimer.start();
 
-	//Create list of objects
-	loadedObjects[0] = &dot;
-	loadedObjects[1] = &it1;
-	loadedObjects[2] = &it2;
-	loadedObjects[3] = &it3;
-	loadedObjects[4] = &it4;
-	loadedObjects[5] = &it5;
-	//Create list of visible objects
-	visibleObjects[0] = &dot;
-	visibleObjects[1] = &it1;
-	visibleObjects[2] = &it2;
-	visibleObjects[3] = &it3;
-	visibleObjects[4] = &it4;
-	visibleObjects[5] = &it5;
-
 	//Select controller
-	void ( BGE_Object::*eventHandler )( SDL_Event & );
+	void ( BGE_Player::*eventHandler )( SDL_Event & );
 
 	if ( joystick == NULL ) {
-		eventHandler = &BGE_Object::handleEvent;
+		eventHandler = &BGE_Player::handleEvent;
 	}
 	else {
-		eventHandler = &BGE_Object::handleEventJoy;
+		eventHandler = &BGE_Player::handleEventJoy;
 	}
 
 	//While application is running
@@ -245,72 +264,94 @@ void BGE_Engine::start() {
 			}
 
 			//Handle input for the player
-			( dot.*eventHandler )( e );
+			( player->*eventHandler )( e );
 		}
+
+		//Add and remove objects from lists.
+		updateVectors();
 
 		//Time between frames in S
 		float frameTime = FPStimer.getMs() / 1000.0f;
 		//Restart the timer
 		FPStimer.start();
 
-		//Apply speed to objects
-		// TODO should be replaced by a more significative update() function.
-		for ( int i = 0; i < loadedObjects.size(); i++ ) {
-			loadedObjects[i]->applySpeed( frameTime );
+		//Apply speed to objects that move.
+		player->update( frameTime );
+		for ( int i = 0; i < items.size(); i++ ) {
+			items[i]->update( frameTime );
 		}
+		for ( int i = 0; i < effects.size(); i++ ) {
+			effects[i]->update( frameTime );
+		}
+
 		//Apply collisions, for each couple of objects applyCollision is called once.
-		//Note player should be always first.
-		for ( std::vector<BGE_Object*>::iterator i = loadedObjects.begin(); i < loadedObjects.end(); i++) {
-            std::vector<BGE_Object*> remainingObjects (i+1, loadedObjects.end());
-            (*i)->applyCollision( remainingObjects );
+		player->applyCollision(items);
+		player->applyCollision(tiles);
+		for ( std::vector<BGE_Object*>::iterator i = items.begin(); i < items.end(); i++) {
+            std::vector<BGE_Object*> remainingItems (i+1, items.end());
+            (*i)->applyCollision( remainingItems );
+            (*i)->applyCollision( tiles );
 		}
 
 		//Adjust viewport.
 		BGE_2DRect freeMove = getFreeMoveArea();
-		BGE_2DRect player = loadedObjects[0]->getCollisionBox();
-        if (!freeMove.contains(player)) {
-			if (player.x < freeMove.x) {
-                viewportOffset.x -= freeMove.x-player.x;
+		BGE_2DRect playerBox = player->getCollisionBox();
+        if (!freeMove.contains(playerBox)) {
+			if (playerBox.x < freeMove.x) {
+                viewportOffset.x -= freeMove.x-playerBox.x;
 			}
-			else if (player.x+player.w > freeMove.x+freeMove.w) {
-				viewportOffset.x += player.x+player.w-freeMove.x-freeMove.w;
+			else if (playerBox.x+playerBox.w > freeMove.x+freeMove.w) {
+				viewportOffset.x += playerBox.x+playerBox.w-freeMove.x-freeMove.w;
 			}
-			if (player.y < freeMove.y) {
-                viewportOffset.y -= freeMove.y-player.y;
+			if (playerBox.y < freeMove.y) {
+                viewportOffset.y -= freeMove.y-playerBox.y;
 			}
-			else if (player.y+player.h > freeMove.y+freeMove.h) {
-				viewportOffset.y += player.y+player.h-freeMove.y-freeMove.h;
+			else if (playerBox.y+playerBox.h > freeMove.y+freeMove.h) {
+				viewportOffset.y += playerBox.y+playerBox.h-freeMove.y-freeMove.h;
 			}
         }
 
         //Update visible object list.
         visibleObjects.clear();
+        visibleObjects.push_back(player);
         BGE_2DRect viewport = getViewport();
-        for ( int i = 0; i < loadedObjects.size(); i++ ) {
-			BGE_2DRect object = loadedObjects[i]->getCollisionBox();
-            if (viewport.overlaps(object)) {
-				//Object is inside the viewport.
-                visibleObjects.push_back(loadedObjects[i]);
+        for ( int i = 0; i < items.size(); i++ ) {
+			BGE_2DRect object = items[i]->getCollisionBox();
+            if (viewport.overlaps(object) && items[i]->isVisible()) {
+				//Object is inside the viewport and visible.
+                visibleObjects.push_back(items[i]);
             }
         }
+        for ( int i = 0; i < tiles.size(); i++ ) {
+			BGE_2DRect object = tiles[i]->getCollisionBox();
+            if (viewport.overlaps(object) && tiles[i]->isVisible()) {
+				//Object is inside the viewport and visible.
+                visibleObjects.push_back(tiles[i]);
+            }
+        }
+        for ( int i = 0; i < effects.size(); i++ ) {
+			BGE_2DRect object = effects[i]->getCollisionBox();
+            if (viewport.overlaps(object) && effects[i]->isVisible()) {
+				//Object is inside the viewport and visible.
+                visibleObjects.push_back(effects[i]);
+            }
+        }
+        std::sort(visibleObjects.begin(), visibleObjects.end(), compareRenderLevel);
 
 		//Clear screen
 		SDL_SetRenderDrawColor( renderer, 100, 110, 100, 0xFF );
 		SDL_RenderClear( renderer );
 
 		//Render visible objects
-		std::sort(visibleObjects.begin(), visibleObjects.end(), compareRenderLevel);
 		for ( int i = 0; i < visibleObjects.size(); i++ ) {
-			if (visibleObjects[i]->isVisible()) {
-				visibleObjects[i]->render();
-			}
+			visibleObjects[i]->render();
 		}
 
 #ifdef DEBUG
 		//Render collision boxes
 		SDL_SetRenderDrawColor( renderer, 0,0,255, 255);
-		for ( int i = 0; i < loadedObjects.size(); i++ ) {
-			BGE_2DRect box = loadedObjects[i]->getCollisionBox();
+		for ( int i = 0; i < visibleObjects.size(); i++ ) {
+			BGE_2DRect box = visibleObjects[i]->getCollisionBox();
 			box -= viewportOffset;
 			SDL_Point points [5];
             points[0] = {box.x,box.y};
@@ -331,6 +372,24 @@ void BGE_Engine::start() {
 }
 
 void BGE_Engine::close() {
+	//Free loaded objects.
+    delete player;
+    for (int i=0; i<items.size(); i++) {
+        delete items[i];
+        items[i] = NULL;
+    }
+    items.clear();
+    for (int i=0; i<tiles.size(); i++) {
+        delete tiles[i];
+        tiles[i] = NULL;
+    }
+    tiles.clear();
+    for (int i=0; i<effects.size(); i++) {
+        delete effects[i];
+        effects[i] = NULL;
+    }
+    effects.clear();
+
 	//Free loaded images
 	stickmanSheet.free();
 	itemSheet.free();
@@ -363,32 +422,6 @@ void BGE_Engine::close() {
 	SDL_Quit();
 }
 
-void BGE_Engine::show(BGE_Object* object) {
-	if (object != NULL ) {
-		//if object is loaded: (not really necessary though...)
-		if (std::find(loadedObjects.begin(), loadedObjects.end(), object) != loadedObjects.end()) {
-            visibleObjects.push_back(object);
-		}
-		else {
-			printf("Error: show(): no such object.\n");
-		}
-	}
-}
-
-void BGE_Engine::hide(BGE_Object *object) {
-	if (object != NULL ) {
-		//if object is visible:
-		std::vector<BGE_Object *>::iterator objectIndex;
-		objectIndex = std::find(visibleObjects.begin(), visibleObjects.end(), object);
-		if ( objectIndex != visibleObjects.end() ) {
-            visibleObjects.erase( objectIndex);
-		}
-		else {
-			printf("Error: hide(): object was not visible.\n");
-		}
-	}
-}
-
 SDL_Renderer *BGE_Engine::getRenderer() {
 	return renderer;
 }
@@ -397,13 +430,74 @@ TTF_Font *BGE_Engine::getFont() {
 	return defaultFont;
 }
 
-std::vector<BGE_Object *> BGE_Engine::getOthers() {
-	return loadedObjects;
+std::vector<BGE_Object *> BGE_Engine::getCollidingObjects() {
+	std::vector<BGE_Object *> colliders = items;
+	colliders.insert(colliders.end(), tiles.begin(), tiles.end());
+	colliders.push_back(player);
+	return colliders;
 }
 
-int BGE_Engine::getRandom(int min, int max) {
+void BGE_Engine::add(BGE_Object *object) {
+    toAdd.push_back(object);
+}
+
+void BGE_Engine::remove(BGE_Object* object) {
+	toRemove.push_back(object);
+}
+
+void BGE_Engine::updateVectors() {
+	//Add new elements to appropriate list.
+    for (int i=0; i<toAdd.size(); i++) {
+		if (toAdd[i]->type == BGE_Object::TILE) {
+            tiles.push_back(toAdd[i]);
+		}
+		else if (toAdd[i]->type == BGE_Object::SPLINTERS) {
+			effects.push_back(toAdd[i]);
+		}
+		else {
+			items.push_back(toAdd[i]);
+		}
+    }
+    toAdd.clear();
+    //Remove elements from all lists.
+    for (int i=0; i<toRemove.size(); i++) {
+		std::vector<BGE_Object *>::iterator index;
+		index = std::find(effects.begin(), effects.end(), toRemove[i]);
+		if (index != effects.end()) {
+			delete *index;
+			effects.erase(index);
+			continue;
+		}
+		index = std::find(items.begin(), items.end(), toRemove[i]);
+		if (index != items.end()) {
+			delete *index;
+			items.erase(index);
+			continue;
+		}
+		index = std::find(tiles.begin(), tiles.end(), toRemove[i]);
+		if (index != tiles.end()) {
+			delete *index;
+			tiles.erase(index);
+			continue;
+		}
+		printf("Failed to eliminate: %s\n", toRemove[i]->getName().c_str());
+    }
+    toRemove.clear();
+}
+
+int BGE_Engine::getRandomInt(int min, int max) {
 	std::uniform_int_distribution<int> uniformDist (min, max);
 	return uniformDist( randomGen);
+}
+
+float BGE_Engine::getRandomFloat( float min, float max) {
+	std::uniform_real_distribution<float> uniformDist (min, max);
+	return uniformDist( randomGen);
+}
+
+float BGE_Engine::getNormalRandom( float mean, float stddev) {
+	std::normal_distribution<float> normalDist (mean, stddev);
+	return normalDist( randomGen);
 }
 
 BGE_2DRect BGE_Engine::getFreeMoveArea() {
@@ -421,5 +515,38 @@ BGE_2DVect BGE_Engine::getViewportOffset() {
 }
 
 bool BGE_Engine::compareRenderLevel(BGE_Object *front, BGE_Object *back) {
-	return front->getPosition().y < back->getPosition().y;
+	return front->position.y < back->position.y;
+}
+
+void BGE_Engine::loadBuilding(int x, int y, int w, int h, BGE_Object::Material material) {
+    for (int i=0; i<h; i++) {
+		BGE_Tile *tile = new BGE_Tile;
+        tile->position.x = x*BGE_Tile::SIDE;
+        tile->position.y = (y+i)*BGE_Tile::SIDE;
+        tile->material = material;
+        tile->texture = &itemSheet;
+        tiles.push_back(tile);
+        tile = new BGE_Tile;
+        tile->position.x = (x+w-1)*BGE_Tile::SIDE;
+        tile->position.y = (y+i)*BGE_Tile::SIDE;
+        tile->material = material;
+        tile->texture = &itemSheet;
+        tiles.push_back(tile);
+    }
+    for (int i=1; i<w-1; i++) {
+		BGE_Tile *tile = new BGE_Tile;
+        tile->position.x = (x+i)*BGE_Tile::SIDE;
+        tile->position.y = y*BGE_Tile::SIDE;
+        tile->material = material;
+        tile->texture = &itemSheet;
+        tiles.push_back(tile);
+        if (i!=1) {
+			tile = new BGE_Tile;
+			tile->position.x = (x+i)*BGE_Tile::SIDE;
+			tile->position.y = (y+h-1)*BGE_Tile::SIDE;
+			tile->material = material;
+			tile->texture = &itemSheet;
+			tiles.push_back(tile);
+        }
+    }
 }

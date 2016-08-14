@@ -19,7 +19,7 @@
 	<string>
 	<cstdint>
 
-1471008721 /home/simone/workspace_C++/SDL_BGE/include/BGE_Object.h
+1471190135 /home/simone/workspace_C++/SDL_BGE/include/BGE_Object.h
 	<SDL2/SDL.h>
 	<vector>
 	<BGE_2DVect.h>
@@ -47,7 +47,7 @@
 	<SDL2/SDL.h>
 	<stdint.h>
 
-1471008746 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Object.cpp
+1471190581 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Object.cpp
 	"BGE_Object.h"
 	"BGE_Engine.h"
 	<vector>
@@ -93,20 +93,22 @@
 	<cmath>
 	<stdio.h>
 
-1470934442 /home/simone/workspace_C++/SDL_BGE/include/BGE_Player.h
-	<BGE_Mover.h>
+1471191530 /home/simone/workspace_C++/SDL_BGE/include/BGE_Player.h
+	<BGE_Item.h>
 
-1470935477 /home/simone/workspace_C++/SDL_BGE/include/BGE_Item.h
-	<BGE_Mover.h>
+1471190374 /home/simone/workspace_C++/SDL_BGE/include/BGE_Item.h
+	<BGE_Object.h>
 	<BGE_2DVect.h>
 
-1471010821 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Item.cpp
+1471190674 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Item.cpp
 	"BGE_Item.h"
 	<BGE_Texture.h>
+	"BGE_Engine.h"
 	<cmath>
 	<stdio.h>
+	<algorithm>
 
-1470936324 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Player.cpp
+1471191013 source:/home/simone/workspace_C++/SDL_BGE/src/BGE_Player.cpp
 	"BGE_Player.h"
 	"BGE_Engine.h"
 	<SDL2/SDL.h>

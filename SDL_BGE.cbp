@@ -36,9 +36,9 @@
 		<Unit filename="img/stickman.png" />
 		<Unit filename="include/BGE_2DRect.h" />
 		<Unit filename="include/BGE_2DVect.h" />
+		<Unit filename="include/BGE_Creature.h" />
 		<Unit filename="include/BGE_Engine.h" />
 		<Unit filename="include/BGE_Item.h" />
-		<Unit filename="include/BGE_Mover.h" />
 		<Unit filename="include/BGE_Object.h" />
 		<Unit filename="include/BGE_Player.h" />
 		<Unit filename="include/BGE_Texture.h" />
@@ -51,9 +51,9 @@
 		<Unit filename="snd/ouch.wav" />
 		<Unit filename="src/BGE_2DRect.cpp" />
 		<Unit filename="src/BGE_2DVect.cpp" />
+		<Unit filename="src/BGE_Creature.cpp" />
 		<Unit filename="src/BGE_Engine.cpp" />
 		<Unit filename="src/BGE_Item.cpp" />
-		<Unit filename="src/BGE_Mover.cpp" />
 		<Unit filename="src/BGE_Object.cpp" />
 		<Unit filename="src/BGE_Player.cpp" />
 		<Unit filename="src/BGE_Texture.cpp" />

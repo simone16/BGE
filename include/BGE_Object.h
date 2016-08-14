@@ -99,11 +99,6 @@ class BGE_Object {
 		virtual void applyCollision( std::vector<BGE_Object *> &others );
 		//Interact( other) is called whenever this touches other.
 		virtual void interact( BGE_Object * other, BGE_2DVect overlapping) {};
-		//Tells this obj that it is contained in another.
-		virtual void setAsContent(bool content);
-		//Used to access content.
-		virtual void add( BGE_Object *object);
-		virtual void remove( BGE_Object *object);
 		//Used to eliminate object.
 		virtual void die();
 
@@ -154,8 +149,6 @@ class BGE_Object {
 		//Direction of the object along x axis [radians].
 		float angle;
 		float health;
-		//Objects contained/owned by this.
-		std::vector<BGE_Object *> content;
 
         //sprite flipping direction [none, horizontal, vertical].
 		SDL_RendererFlip flip;

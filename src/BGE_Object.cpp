@@ -49,7 +49,7 @@ void BGE_Object::init() {
     dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric",  PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX,0.1};
 }
 
-BGE_Object::BGE_Object() : content(0) {
+BGE_Object::BGE_Object() {
 	//Position is initialised to 0,0
 	//Content is initialised to empty.
 	//Set a default type.
@@ -99,34 +99,7 @@ void BGE_Object::applyCollision(std::vector<BGE_Object*> &others) {
 	}
 }
 
-void BGE_Object::setAsContent(bool content) {
-    visible = !content;
-    solid = !content;
-    setCollision( !content);
-}
-
-void BGE_Object::add( BGE_Object *object) {
-	content.push_back(object);
-	object->setAsContent(true);
-}
-
-void BGE_Object::remove( BGE_Object *object) {
-	std::vector<BGE_Object *>::iterator objectIndex;
-	objectIndex = std::find(content.begin(), content.end(), object);
-	if ( objectIndex != content.end() ) {
-		object->setAsContent(false);
-		content.erase( objectIndex);
-	}
-}
-
 void BGE_Object::die() {
-    for (int i=0; i<content.size(); i++) {
-        content[i]->position = position;
-        BGE_Item *item = static_cast<BGE_Item *>(content[i]);
-        item->speed.setPolar(engine->getNormalRandom(100, 50), engine->getRandomFloat(0, TWO_PI));
-        content[i]->setAsContent(false);
-    }
-    content.clear();
     engine->remove(this);
 }
 

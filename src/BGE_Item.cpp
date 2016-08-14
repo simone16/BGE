@@ -1,12 +1,14 @@
 #include "BGE_Item.h"
 
 #include <BGE_Texture.h>
+#include "BGE_Engine.h"
 
 #include <cmath>
 #include <stdio.h>
+#include <algorithm>	//used for std::find
 
 const float BGE_Item::DRAG = 0.5;
-const float BGE_Item::STOP_THRESHOLD = 10;
+const float BGE_Item::STOP_THRESHOLD = 10;  // [px/S]
 
 BGE_Item::BGE_Item() {
     //Position and speed are initialised to 0,0.
@@ -23,7 +25,7 @@ BGE_Item::BGE_Item() {
 BGE_Item::~BGE_Item() {}
 
 void BGE_Item::update(float Dt) {
-    BGE_Mover::update(Dt);
+    position += speed*Dt;
     speed = speed*(1-Dt*DRAG);
     if (speed.modulus() < STOP_THRESHOLD) {
 		speed.x = 0;
@@ -46,7 +48,7 @@ void BGE_Item::interact(BGE_Object* other, BGE_2DVect overlap) {
     }
     //Other is not a tile.
     else {
-        BGE_Mover *otherMover = static_cast<BGE_Mover*>(other);
+        BGE_Item *otherMover = static_cast<BGE_Item *>(other);
         //Correct both position 50%.
         position += overlap*0.5;
         otherMover->position -= overlap*0.5;
@@ -67,6 +69,48 @@ void BGE_Item::interact(BGE_Object* other, BGE_2DVect overlap) {
             otherMover->speed.y = ((m2-m1)*v2+2*m1*v1)/(m1+m2);
         }
     }
+}
+
+void BGE_Item::hit(BGE_2DVect origin, float energy) {
+    BGE_Object::hit(origin, energy);
+    BGE_2DVect effect = position - origin;
+    effect.setPolar( std::sqrt(2*energy/getMass()), effect.angle());
+    speed += effect;
+}
+
+void BGE_Item::die() {
+    for (int i=0; i<content.size(); i++) {
+        content[i]->position = position;
+        content[i]->speed.setPolar(engine->getNormalRandom(100, 50), engine->getRandomFloat(0, TWO_PI));
+        content[i]->setAsContent(false);
+    }
+    content.clear();
+    BGE_Object::die();
+}
+
+
+void BGE_Item::setAsContent(bool content) {
+    visible = !content;
+    solid = !content;
+    setCollision( !content);
+    if (content) {
+        speed.x = 0;
+        speed.y = 0;
+    }
+}
+
+void BGE_Item::add( BGE_Item *item) {
+	content.push_back(item);
+	item->setAsContent(true);
+}
+
+void BGE_Item::remove( BGE_Item *item) {
+	std::vector<BGE_Item *>::iterator itemIndex;
+	itemIndex = std::find(content.begin(), content.end(), item);
+	if ( itemIndex != content.end() ) {
+		item->setAsContent(false);
+		content.erase( itemIndex);
+	}
 }
 
 void BGE_Item::render() {

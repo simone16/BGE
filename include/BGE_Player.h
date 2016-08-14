@@ -1,9 +1,9 @@
 #ifndef BGE_PLAYER_H
 #define BGE_PLAYER_H
 
-#include <BGE_Mover.h>
+#include <BGE_Item.h>
 
-class BGE_Player : public BGE_Mover {
+class BGE_Player : public BGE_Item {
     public:
         //Can carry objects smaller than... [px3].
         static const float POCKETS_VOLUME;
@@ -40,8 +40,6 @@ class BGE_Player : public BGE_Mover {
 		void interact(BGE_Object * other, BGE_2DVect overlap);
 		void use();
 		void dispose();
-		//Reduces HPs.
-		void wound( int damage );
 
 		void move(float Dt, std::vector<BGE_Object *> others);
 
@@ -49,13 +47,12 @@ class BGE_Player : public BGE_Mover {
 		void updateAngle();
 
 		//Needs to override these to update activeItem.
-		void add( BGE_Object *object);
-		void remove( BGE_Object *object);
+		void add( BGE_Item *item);
+		void remove( BGE_Item *item);
     protected:
     private:
         Status status;
-        float healthPoints;
-        BGE_Object *activeItem;
+        BGE_Item *activeItem;
 
         BGE_2DVect mousePositionOnScreen;
 };

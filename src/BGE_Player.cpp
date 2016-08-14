@@ -21,7 +21,6 @@ const float BGE_Player::THROW_ENERGY = 4000;
 BGE_Player::BGE_Player() {
 	activeItem = NULL;
 	status = IDLE;
-	healthPoints = 5;
 
 	//Set object properties.
 	material = Material::FLESH;
@@ -49,7 +48,7 @@ void BGE_Player::handleEvent( SDL_Event &e ) {
 			}
 		}
 		else if (e.button.button == SDL_BUTTON_MIDDLE) {
-			printf("HP: %f\n", healthPoints);
+			printf("HP: %f\n", health);
 
 		}
 	}
@@ -66,7 +65,7 @@ void BGE_Player::handleEvent( SDL_Event &e ) {
 	//If mouse wheel is rotated
 	else if (e.type == SDL_MOUSEWHEEL) {
 		if (!content.empty()) {
-			std::vector<BGE_Object *>::iterator index = std::find(content.begin(), content.end(), activeItem);
+			std::vector<BGE_Item *>::iterator index = std::find(content.begin(), content.end(), activeItem);
 			index += e.wheel.y;
             while (index < content.begin()) {
 				index += content.size();
@@ -297,7 +296,7 @@ void BGE_Player::update(float Dt) {
 //			break;
 //	}
 
-	BGE_Mover::update(Dt);
+	position += speed*Dt;
 	updateAngle();
 }
 
@@ -308,7 +307,7 @@ void BGE_Player::interact(BGE_Object *other, BGE_2DVect overlap) {
 	}
     else if (other->getVolume() <= POCKETS_VOLUME) {
 		//Put in inventory.
-        add(other);
+        add(static_cast<BGE_Item*>(other));
         printf("%s added to inventory!\n", other->getName().c_str());
     }
     else if (other->getMass() <= MOVE_WEIGHT_THRESHOLD) {
@@ -331,18 +330,16 @@ void BGE_Player::interact(BGE_Object *other, BGE_2DVect overlap) {
 void BGE_Player::use() {
 	switch (activeItem->getUse()) {
 		case BGE_Object::Use::WEAPON: {
-			BGE_Item *item = static_cast<BGE_Item*>(activeItem);
 			//Throw it.
 			//Place object outside collision range.
-            item->position.setPolar(getCollisionRadius() + item->getCollisionRadius()+2, angle);
-            item->position += position;
+            activeItem->position.setPolar(getCollisionRadius() + activeItem->getCollisionRadius()+2, angle);
+            activeItem->position += position;
             //Set object speed according to throw strenght.
-            item->speed.setPolar( std::sqrt(2*THROW_ENERGY/item->getMass()), angle);
+            activeItem->speed.setPolar( std::sqrt(2*THROW_ENERGY/activeItem->getMass()), angle);
 			remove(activeItem);
 			break;
 		}
 		case BGE_Object::Use::HANDHELD_WEAPON:
-			//attackAnimationCtr = 5;
 			break;
 		case BGE_Object::Use::SHOOTING_WEAPON:
 			printf("Shooting weapon\n");
@@ -404,8 +401,8 @@ void BGE_Player::use() {
 			}
 			break;
 		case BGE_Object::Use::FOOD: {
-            healthPoints = healthPoints + activeItem->getNutrition();
-            printf("Current HP: %f\n", healthPoints);
+            health += activeItem->getNutrition();
+            printf("Current HP: %f\n", health);
             printf("total toxicity HP: %f\n", activeItem->getNutrition());
             engine->remove(activeItem);
             remove(activeItem);
@@ -425,27 +422,10 @@ void BGE_Player::dispose() {
 	remove(activeItem);
 }
 
-void BGE_Player::wound( int damage ) {
-	healthPoints -= damage;
-
-	if ( healthPoints <= 0 ) {
-			status = DIE;
-			//animationCtr = 0;
-			speed.x = 0;
-			Mix_PlayChannel( -1, dieFx, 0 );
-		}
-	else {
-			status = WOUNDED;
-			//animationCtr = 0;
-			speed.x = 0;
-			Mix_PlayChannel( -1, woundFx, 0 );
-		}
-}
-
 void BGE_Player::updateAngle() {
 	BGE_2DVect correction (0,12.5);
 	BGE_2DVect mouseRel = mousePositionOnScreen - (position - engine->getViewportOffset()) + correction;
-	setAngle(mouseRel.angle());
+	BGE_Object::setAngle(mouseRel.angle());
 	if (activeItem != NULL) {
 		activeItem->position.setPolar(25, angle);
 		activeItem->position += position;
@@ -453,16 +433,16 @@ void BGE_Player::updateAngle() {
 	}
 }
 
-void BGE_Player::add( BGE_Object *object) {
-	BGE_Object::add(object);
+void BGE_Player::add( BGE_Item *item) {
+	BGE_Item::add(item);
 	if (activeItem == NULL) {
-		activeItem = object;
+		activeItem = item;
 	}
 }
 
-void BGE_Player::remove( BGE_Object *object) {
-	BGE_Object::remove( object);
-	if (activeItem == object) {
+void BGE_Player::remove( BGE_Item *item) {
+	BGE_Item::remove( item);
+	if (activeItem == item) {
 		if (content.empty()) {
 			activeItem = NULL;
 		}

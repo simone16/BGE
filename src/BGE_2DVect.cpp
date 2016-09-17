@@ -66,6 +66,29 @@ float BGE_2DVect::angle() const {
 	return std::atan2( y, x );
 }
 
+Uint8 BGE_2DVect::quadrant() const {
+    //Quadrant assumes integer values depending on angle
+	//    '.1.'
+	//	  2 * 0
+	//    .'3'.
+    if (std::abs(x) >= std::abs(y)) {
+        if (x >= 0) {
+            return 0;
+        }
+        else {
+            return 2;
+        }
+    }
+    else {
+        if (y >= 0) {
+            return 3;
+        }
+        else {
+            return 1;
+        }
+    }
+}
+
 BGE_2DVect::operator SDL_Point() const {
     SDL_Point sdl = { int(x), int(y)};
     return sdl;

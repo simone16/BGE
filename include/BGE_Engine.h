@@ -9,15 +9,15 @@
 #define GAME_H
 
 #include <vector>
-#include "BGE_Texture.h"
-#include "BGE_Player.h"
-#include "BGE_Item.h"
+#include <BGE_Texture.h>
+#include <BGE_Object.h>
 #include <BGE_2DRect.h>
 #include <BGE_2DVect.h>
 
 #include <random>
 
-class BGE_Object;
+class BGE_Creature;
+class BGE_Player;
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -48,13 +48,14 @@ class BGE_Engine {
 		//Mainly used to release memory (complementary to load()).
 		void close();
 
-		//Returns the renderer to use for displaying textures on screen.
-		SDL_Renderer * getRenderer();
+		void gameOver();
+
 		//Returns the default font of the game (used to create textures from text).
 		TTF_Font * getFont();
 		//Returns the offset to apply to sprites positions.
 		BGE_2DVect getViewportOffset();
 
+		BGE_Player * getPlayer();
 		//Returns a list of loaded collideable objects.
         std::vector<BGE_Object *> getCollidingObjects();
         //Add an object to the current level.
@@ -69,12 +70,19 @@ class BGE_Engine {
 		float getRandomFloat(float min, float max);
 		float getNormalRandom(float mean, float stddev);
 
-		 BGE_Texture splintersSheet;
-		 BGE_Texture stickmanSheet, itemSheet;
+		//Game textures
+		BGE_Texture splintersSheet;
+		BGE_Texture stickmanSheet;
+		BGE_Texture itemSheetSmall;
+		BGE_Texture itemSheetTall;
+		BGE_Texture tileSheet;
+		BGE_Texture hatsSheet;
+		BGE_Texture textFrame;
 	protected:
 	private:
+		bool gameover;
+
 		SDL_Window *window;
-		SDL_Renderer *renderer;
 		SDL_Joystick *joystick;
 		TTF_Font *defaultFont;
 		bool useJoystick;
@@ -85,12 +93,13 @@ class BGE_Engine {
 
 		//Player in the current level.
 		BGE_Player * player;
+		std::vector<BGE_Object *> creatures;
 		std::vector<BGE_Object *> items;
 		std::vector<BGE_Object *> tiles;
 		std::vector<BGE_Object *> effects;
 		//Objects inside the current viewport.
 		std::vector<BGE_Object *> visibleObjects;
-		//Used to manipulate objects in runtime.
+		//Used to manipulate objects at runtime.
 		std::vector<BGE_Object *> toAdd;
 		std::vector<BGE_Object *> toRemove;
 

@@ -1,11 +1,9 @@
-// Commented includes are reduntant to Game.h
-
 // Definitions for this class
 #include "BGE_Engine.h"
 
-// Definitions for other classes of the project
-//#include "BGE_Texture.h"
-#include <BGE_Object.h>
+// Definitions for other classes in this project
+#include <BGE_Enemy.h>
+#include <BGE_Player.h>
 #include <BGE_Timer.h>
 #include <BGE_2DRect.h>
 #include <BGE_Tile.h>
@@ -16,9 +14,8 @@
 #include <SDL2/SDL_ttf.h>   //used to render text to images/textures
 #include <SDL2/SDL_mixer.h> //used to play sounds
 #include <stdio.h>
-//#include <vector>
-#include <fstream>
-#include <chrono>
+#include <fstream>      //??
+#include <chrono>       //used for epoch
 #include <algorithm>	//used for std::find and std::sort
 
 
@@ -30,7 +27,7 @@ const float BGE_Engine::FREE_MOVE_ZONE = 0.5;
 BGE_Engine::BGE_Engine() {
 	//Initialise pointers.
 	window = NULL;
-	renderer = NULL;
+	BGE_Texture::renderer = NULL;
 	joystick = NULL;
 	BGE_Object::engine = this;
 	player = NULL;
@@ -67,7 +64,7 @@ bool BGE_Engine::init() {
 		}
 
 		//Create window
-		window = SDL_CreateWindow( "Culo Culo", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		window = SDL_CreateWindow( "COPS!!!1!!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 
 		if( window == NULL ) {
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -75,15 +72,15 @@ bool BGE_Engine::init() {
 		}
 		else {
 			//Create vsynced renderer for window
-			renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+			BGE_Texture::renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
 
-			if( renderer == NULL ) {
+			if( BGE_Texture::renderer == NULL ) {
 				printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
 				success = false;
 			}
 			else {
 				//Initialize renderer color
-				SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+				SDL_SetRenderDrawColor( BGE_Texture::renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 
 				//Initialize PNG loading
 				int imgFlags = IMG_INIT_PNG;
@@ -124,29 +121,65 @@ bool BGE_Engine::load() {
 
 	//Load textures
 	BGE_Texture::engine = this;
-	if( !stickmanSheet.loadFromFile( "img/stickman.png" ) ) {
-		printf( "Failed to load stickman texture!\n" );
+	std::string filename;
+	filename = "img/stickman.png";
+	if( !stickmanSheet.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());
 		success = false;
 	}
 	else {
-		stickmanSheet.setSpriteSize( 50, 50);
+		stickmanSheet.setSpriteSize( 25, 50);
 		stickmanSheet.setSpriteOffset(0, -12);
 	}
-	if( !itemSheet.loadFromFile( "img/itemsheet.png" ) ) {
-		printf( "Failed to load items texture!\n" );
+	filename = "img/items25x25.png";
+	if( !itemSheetSmall.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());
 		success = false;
 	}
 	else {
-		itemSheet.setSpriteSize( 25, 50);
-		itemSheet.setSpriteOffset(0, -12);
+		itemSheetSmall.setSpriteSize( 25, 25);
+		itemSheetSmall.setSpriteOffset(0, -12);
 	}
-	if( !splintersSheet.loadFromFile( "img/splinters.png" ) ) {
-		printf( "Failed to load items splinters!\n" );
+	filename = "img/items25x50.png";
+	if( !itemSheetTall.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());
+		success = false;
+	}
+	else {
+		itemSheetTall.setSpriteSize( 25, 50);
+		itemSheetTall.setSpriteOffset(0, -12);
+	}
+	filename = "img/tiles.png";
+	if( !tileSheet.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());
+		success = false;
+	}
+	else {
+		tileSheet.setSpriteSize( 25, 50);
+		tileSheet.setSpriteOffset(0, -12);
+	}
+	filename = "img/splinters.png";
+	if( !splintersSheet.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());
 		success = false;
 	}
 	else {
 		splintersSheet.setSpriteSize( 25, 25);
 		splintersSheet.setSpriteOffset(0, -12);
+	}
+	filename = "img/hats.png";
+	if( !hatsSheet.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());
+		success = false;
+	}
+	else {
+		hatsSheet.setSpriteSize( 25, 25);
+		hatsSheet.setSpriteOffset(0, -30);
+	}
+	filename = "img/textFrame.png";
+	if( !textFrame.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());;
+		success = false;
 	}
 
 	//Load text
@@ -166,7 +199,7 @@ bool BGE_Engine::load() {
 		success = false;
 	}
 	else {
-		if ( !textTest.loadFromRenderedText( lines[getRandomInt(0, ctr-1)], 0, 0, 0 ) ) {
+		if ( !textTest.loadFromRenderedTextOnFrame( lines[getRandomInt(0, ctr-1)], 0, 0, 0 ) ) {
 			printf( "Failed to load texture from text.\n" );
 			success = false;
 		}
@@ -192,18 +225,34 @@ bool BGE_Engine::load() {
     player = new BGE_Player;
     player->position.x = 50;
     player->position.y = 50;
-    player->type = BGE_Object::CREATURE;
-    player->material = BGE_Object::Material::FLESH;
-    player->texture = &stickmanSheet;
+
+    //Load some enemies.
+    for (int i=0; i<5; i++) {
+        BGE_Enemy *enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+        enemy->position.x = getRandomInt(0, 1000);
+        enemy->position.y = getRandomInt(0, 500);
+        enemy->target = enemy->position;
+        creatures.push_back(enemy);
+    }
+    BGE_Enemy *walker = new BGE_Enemy(BGE_Object::CreatureType::COWBOY);
+    walker->position.x = -100;
+    walker->position.y = -100;
+    BGE_2DVect point (-300,-100);
+    walker->addCheckPoint(point);
+    point.y = -300;
+    walker->addCheckPoint(point);
+    point.x = -100;
+    point.y = -100;
+    walker->addCheckPoint(point);
+    creatures.push_back(walker);
 
     //Load some random objects.
     for (int i=0; i<30; i++) {
-        BGE_Item *item = new BGE_Item;
+        BGE_Object::Type itemType = static_cast<BGE_Object::Type>(getRandomInt(0, BGE_Object::TOT-1));
+        BGE_Object::Material itemMaterial = static_cast<BGE_Object::Material>(getRandomInt(0, static_cast<int>(BGE_Object::Material::TOT)-1));
+        BGE_Item *item = new BGE_Item(itemType, itemMaterial);
         item->position.x = getRandomInt(0, 1000);
         item->position.y = getRandomInt(0, 500);
-        item->type = static_cast<BGE_Object::Type>(getRandomInt(0, BGE_Object::TOT-1));
-        item->material = static_cast<BGE_Object::Material>(getRandomInt(0, static_cast<int>(BGE_Object::Material::TOT)-1));
-        item->texture = &itemSheet;
         items.push_back(item);
     }
     //Load some rooms.
@@ -211,31 +260,23 @@ bool BGE_Engine::load() {
         loadBuilding(i*8, 0, 7, 7, BGE_Object::Material::PINEWOOD);
     }
 	//Load some testing items.
-	BGE_Item *item = new BGE_Item;
+	BGE_Item *item = new BGE_Item( BGE_Object::BARREL, BGE_Object::Material::PINEWOOD);
 	item->position.x = 50;
 	item->position.y = 200;
-	item->type = BGE_Object::BARREL;
-	item->material = BGE_Object::Material::PINEWOOD;
-	item->texture = &itemSheet;
 	items.push_back(item);
 	for (int i=0; i<7; i++) {
-        BGE_Item *item2 = new BGE_Item;
+        BGE_Item *item2 = new BGE_Item( BGE_Object::STONE, BGE_Object::Material::MARBLE);
         item2->position.x = getRandomInt(0, 1000);
         item2->position.y = getRandomInt(0, 500);
-        item2->type = BGE_Object::STONE;
-        item2->material = BGE_Object::Material::MARBLE;
-        item2->texture = &itemSheet;
         items.push_back(item2);
         item->add(item2);
     }
-	//dot.setSoundFxs( ouchFx, muoioFx );
 
 	return success;
 }
 
 void BGE_Engine::start() {
-	//Main loop flag
-	bool quit = false;
+    gameover = false;
 
 	//Event handler
 	SDL_Event e;
@@ -255,12 +296,12 @@ void BGE_Engine::start() {
 	}
 
 	//While application is running
-	while( !quit ) {
+	while( !gameover ) {
 		//Handle events on queue
 		while( SDL_PollEvent( &e ) != 0 ) {
 			//User requests quit
 			if( e.type == SDL_QUIT ) {
-				quit = true;
+				gameover = true;
 			}
 
 			//Handle input for the player
@@ -275,8 +316,11 @@ void BGE_Engine::start() {
 		//Restart the timer
 		FPStimer.start();
 
-		//Apply speed to objects that move.
+		//Apply speed to objects that move etc...
 		player->update( frameTime );
+		for ( int i = 0; i < creatures.size(); i++ ) {
+			creatures[i]->update( frameTime );
+		}
 		for ( int i = 0; i < items.size(); i++ ) {
 			items[i]->update( frameTime );
 		}
@@ -285,8 +329,15 @@ void BGE_Engine::start() {
 		}
 
 		//Apply collisions, for each couple of objects applyCollision is called once.
+		player->applyCollision(creatures);
 		player->applyCollision(items);
 		player->applyCollision(tiles);
+		for ( std::vector<BGE_Object*>::iterator i = creatures.begin(); i < creatures.end(); i++) {
+            std::vector<BGE_Object*> remainingCreatures (i+1, creatures.end());
+            (*i)->applyCollision( remainingCreatures );
+            (*i)->applyCollision( items );
+            (*i)->applyCollision( tiles );
+		}
 		for ( std::vector<BGE_Object*>::iterator i = items.begin(); i < items.end(); i++) {
             std::vector<BGE_Object*> remainingItems (i+1, items.end());
             (*i)->applyCollision( remainingItems );
@@ -315,6 +366,13 @@ void BGE_Engine::start() {
         visibleObjects.clear();
         visibleObjects.push_back(player);
         BGE_2DRect viewport = getViewport();
+        for ( int i = 0; i < creatures.size(); i++ ) {
+			BGE_2DRect object = creatures[i]->getCollisionBox();
+            if (viewport.overlaps(object) && creatures[i]->isVisible()) {
+				//Object is inside the viewport and visible.
+                visibleObjects.push_back(creatures[i]);
+            }
+        }
         for ( int i = 0; i < items.size(); i++ ) {
 			BGE_2DRect object = items[i]->getCollisionBox();
             if (viewport.overlaps(object) && items[i]->isVisible()) {
@@ -339,8 +397,8 @@ void BGE_Engine::start() {
         std::sort(visibleObjects.begin(), visibleObjects.end(), compareRenderLevel);
 
 		//Clear screen
-		SDL_SetRenderDrawColor( renderer, 100, 110, 100, 0xFF );
-		SDL_RenderClear( renderer );
+		SDL_SetRenderDrawColor( BGE_Texture::renderer, 100, 110, 100, 50 );
+		SDL_RenderClear( BGE_Texture::renderer );
 
 		//Render visible objects
 		for ( int i = 0; i < visibleObjects.size(); i++ ) {
@@ -349,7 +407,7 @@ void BGE_Engine::start() {
 
 #ifdef DEBUG
 		//Render collision boxes
-		SDL_SetRenderDrawColor( renderer, 0,0,255, 255);
+		SDL_SetRenderDrawColor( BGE_Texture::renderer, 0,0,255, 255);
 		for ( int i = 0; i < visibleObjects.size(); i++ ) {
 			BGE_2DRect box = visibleObjects[i]->getCollisionBox();
 			box -= viewportOffset;
@@ -359,21 +417,36 @@ void BGE_Engine::start() {
             points[2] = {box.x+box.w,box.y+box.h};
             points[3] = {box.x,box.y+box.h};
             points[4] = {box.x,box.y};
-			SDL_RenderDrawLines(renderer, points, 5);
+			SDL_RenderDrawLines(BGE_Texture::renderer, points, 5);
 		}
 #endif // DEBUG
 
 		//Render test text
 		textTest.render( SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 );
 
+		//Render player data
+		SDL_Rect progressBar = {50, SCREEN_HEIGHT-50, 0, 10};
+        progressBar.w = player->getHealthPercent();
+        SDL_SetRenderDrawColor( BGE_Texture::renderer, 255, 50, 50, 200);
+        SDL_RenderFillRect( BGE_Texture::renderer, &progressBar);
+        SDL_SetRenderDrawColor( BGE_Texture::renderer, 50, 50, 200, 200);
+        progressBar.y += 20;
+        progressBar.w = 50;
+        SDL_RenderFillRect( BGE_Texture::renderer, &progressBar);
+
 		//Update screen
-		SDL_RenderPresent( renderer );
+		SDL_RenderPresent( BGE_Texture::renderer );
 	}
 }
 
 void BGE_Engine::close() {
 	//Free loaded objects.
     delete player;
+    for (int i=0; i<creatures.size(); i++) {
+        delete creatures[i];
+        creatures[i] = NULL;
+    }
+    creatures.clear();
     for (int i=0; i<items.size(); i++) {
         delete items[i];
         items[i] = NULL;
@@ -392,7 +465,9 @@ void BGE_Engine::close() {
 
 	//Free loaded images
 	stickmanSheet.free();
-	itemSheet.free();
+	itemSheetSmall.free();
+	splintersSheet.free();
+	hatsSheet.free();
 	textTest.free();
 
 	//Free fonts
@@ -410,10 +485,10 @@ void BGE_Engine::close() {
 	joystick = NULL;
 
 	//Destroy window
-	SDL_DestroyRenderer( renderer );
+	SDL_DestroyRenderer( BGE_Texture::renderer );
 	SDL_DestroyWindow( window );
 	window = NULL;
-	renderer = NULL;
+	BGE_Texture::renderer = NULL;
 
 	//Quit SDL subsystems
 	Mix_Quit();
@@ -422,16 +497,21 @@ void BGE_Engine::close() {
 	SDL_Quit();
 }
 
-SDL_Renderer *BGE_Engine::getRenderer() {
-	return renderer;
+void BGE_Engine::gameOver() {
+    gameover = true;
 }
 
 TTF_Font *BGE_Engine::getFont() {
 	return defaultFont;
 }
 
+BGE_Player *BGE_Engine::getPlayer() {
+    return player;
+}
+
 std::vector<BGE_Object *> BGE_Engine::getCollidingObjects() {
-	std::vector<BGE_Object *> colliders = items;
+	std::vector<BGE_Object *> colliders = creatures;
+	colliders.insert(colliders.end(), items.begin(), items.end());
 	colliders.insert(colliders.end(), tiles.begin(), tiles.end());
 	colliders.push_back(player);
 	return colliders;
@@ -451,8 +531,11 @@ void BGE_Engine::updateVectors() {
 		if (toAdd[i]->type == BGE_Object::TILE) {
             tiles.push_back(toAdd[i]);
 		}
-		else if (toAdd[i]->type == BGE_Object::SPLINTERS) {
+		else if (toAdd[i]->type == BGE_Object::VIS_EFFECT) {
 			effects.push_back(toAdd[i]);
+		}
+		else if (toAdd[i]->type == BGE_Object::CREATURE) {
+            creatures.push_back(toAdd[i]);
 		}
 		else {
 			items.push_back(toAdd[i]);
@@ -462,6 +545,12 @@ void BGE_Engine::updateVectors() {
     //Remove elements from all lists.
     for (int i=0; i<toRemove.size(); i++) {
 		std::vector<BGE_Object *>::iterator index;
+		index = std::find(creatures.begin(), creatures.end(), toRemove[i]);
+		if (index != creatures.end()) {
+			delete *index;
+			creatures.erase(index);
+			continue;
+		}
 		index = std::find(effects.begin(), effects.end(), toRemove[i]);
 		if (index != effects.end()) {
 			delete *index;
@@ -480,7 +569,7 @@ void BGE_Engine::updateVectors() {
 			tiles.erase(index);
 			continue;
 		}
-		printf("Failed to eliminate: %s\n", toRemove[i]->getName().c_str());
+        printf("Failed to eliminate: %s\n", toRemove[i]->getName().c_str());
     }
     toRemove.clear();
 }
@@ -520,32 +609,24 @@ bool BGE_Engine::compareRenderLevel(BGE_Object *front, BGE_Object *back) {
 
 void BGE_Engine::loadBuilding(int x, int y, int w, int h, BGE_Object::Material material) {
     for (int i=0; i<h; i++) {
-		BGE_Tile *tile = new BGE_Tile;
+		BGE_Tile *tile = new BGE_Tile( material );
         tile->position.x = x*BGE_Tile::SIDE;
         tile->position.y = (y+i)*BGE_Tile::SIDE;
-        tile->material = material;
-        tile->texture = &itemSheet;
         tiles.push_back(tile);
-        tile = new BGE_Tile;
+        tile = new BGE_Tile( material );
         tile->position.x = (x+w-1)*BGE_Tile::SIDE;
         tile->position.y = (y+i)*BGE_Tile::SIDE;
-        tile->material = material;
-        tile->texture = &itemSheet;
         tiles.push_back(tile);
     }
     for (int i=1; i<w-1; i++) {
-		BGE_Tile *tile = new BGE_Tile;
+		BGE_Tile *tile = new BGE_Tile( material );
         tile->position.x = (x+i)*BGE_Tile::SIDE;
         tile->position.y = y*BGE_Tile::SIDE;
-        tile->material = material;
-        tile->texture = &itemSheet;
         tiles.push_back(tile);
         if (i!=1) {
-			tile = new BGE_Tile;
+			tile = new BGE_Tile( material );
 			tile->position.x = (x+i)*BGE_Tile::SIDE;
 			tile->position.y = (y+h-1)*BGE_Tile::SIDE;
-			tile->material = material;
-			tile->texture = &itemSheet;
 			tiles.push_back(tile);
         }
     }

@@ -19,57 +19,79 @@ const float BGE_Object::DEGREE_OVER_RADIANS = 57.29577951;
 const float BGE_Object::LITERS_PER_CUBIC_PX = 1/(8*156.25);
 BGE_Object::TypeData BGE_Object::dataOf[TOT];
 BGE_Object::MaterialData BGE_Object::dataOfMaterial[static_cast<int>(BGE_Object::Material::TOT)];
+BGE_Object::CreatureData BGE_Object::dataOfCreature[static_cast<int>(BGE_Object::CreatureType::TOT)];
 
 void BGE_Object::init() {
-    //                  Name        Use          Z_Depth, Width, Height
-    dataOf[BARREL] =    {"Barrel",Use::NONE          ,30,25,25};
-    dataOf[BLOCK] =     {"Block",Use::NONE          ,25,25,25};
-    dataOf[BOTTLE] =    {"Bottle",Use::WEAPON        ,20,10,10};
-    dataOf[BULLETS] =   {"Bullets",Use::NONE          ,10,10,10};
-    dataOf[CHAIR] =     {"Chair",Use::NONE           ,50,25,25};
-    dataOf[GUN] =       {"Gun",Use::SHOOTING_WEAPON,20,15,10};
-    dataOf[CREATURE] =  {"Creature",Use::FOOD          ,50,25,25};
-    dataOf[MOUSE] =     {"Mouse",Use::FOOD          ,10,10,10};
-    dataOf[KNIFE] =     {"Knife",Use::HANDHELD_WEAPON,10,10,10};
-    dataOf[STONE] =     {"Stone",Use::WEAPON        ,10,10,10};
-    dataOf[SWORD] =     {"Sword",Use::HANDHELD_WEAPON,10,25,10};
-    dataOf[SPLINTERS] = {"Splinters",Use::NONE      ,0,0,0};
-    dataOf[TABLE] =     {"Table",Use::NONE           ,25,25,25};
-    dataOf[TILE] =      {"Tile",Use::NONE           ,25,25,25};
+    //                  Name        Use            reload_time  base_health    Z_Depth, Width, Height   sprite sheet and column
+    dataOf[BARREL] =    {"Barrel",Use::NONE        ,0.1        ,5000            ,30,25,25               ,&(engine->itemSheetTall),2};
+    dataOf[BLOCK] =     {"Block",Use::NONE         ,0.1        ,1100            ,25,25,25               ,NULL,0};
+    dataOf[BOTTLE] =    {"Bottle",Use::WEAPON      ,0.2        ,100             ,20,10,10               ,&(engine->itemSheetTall),3};
+    dataOf[BULLETS] =   {"Bullets",Use::NONE       ,0.1        ,2000            ,10,10,10               ,&(engine->itemSheetSmall),1};
+    dataOf[CHAIR] =     {"Chair",Use::NONE         ,0.1        ,5000            ,50,25,25               ,NULL,0};
+    dataOf[GUN] =       {"Gun",Use::SHOOTING_WEAPON,0.5        ,2000            ,20,15,10               ,&(engine->itemSheetSmall),2};
+    dataOf[CREATURE] =  {"Creature",Use::FOOD      ,1.0        ,0               ,50,25,25               ,NULL,0};
+    dataOf[MOUSE] =     {"Mouse",Use::FOOD         ,1.0        ,500             ,10,10,10               ,NULL,0};
+    dataOf[KNIFE] =     {"Knife",Use::HANDHELD_WEAPON,0.5      ,2000            ,10,10,10               ,&(engine->itemSheetSmall),3};
+    dataOf[STONE] =     {"Stone",Use::WEAPON       ,0.5        ,6000            ,10,10,10               ,&(engine->itemSheetSmall),4};
+    dataOf[SWORD] =     {"Sword",Use::HANDHELD_WEAPON,0.5      ,3000            ,10,25,10               ,&(engine->itemSheetTall) ,0};
+    dataOf[VIS_EFFECT] ={"Splinters",Use::NONE     ,0          ,100             ,0,0,0                  ,&(engine->itemSheetSmall),0};
+    dataOf[TABLE] =     {"Table",Use::NONE         ,0.1        ,5000            ,25,25,25               ,NULL,0};
+    dataOf[TILE] =      {"Tile",Use::NONE          ,0.1        ,100000          ,25,25,25               ,NULL,0};
 
-    //                  		 name       state                     density 					nutrition
-    dataOfMaterial[static_cast<int>(Material::FLESH)] =     {"meat",   PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX,1.0};
-    dataOfMaterial[static_cast<int>(Material::BONE)] =      {"bone",    PhysicalState::HARD_SOLID   ,0.7*LITERS_PER_CUBIC_PX,0.1};
-    dataOfMaterial[static_cast<int>(Material::IRON)] =      {"iron",    PhysicalState::HARD_SOLID   ,7.9*LITERS_PER_CUBIC_PX,-0.5};
-    dataOfMaterial[static_cast<int>(Material::PINEWOOD)] =  {"pine wood",PhysicalState::HARD_SOLID  ,0.5*LITERS_PER_CUBIC_PX,-0.1};
-    dataOfMaterial[static_cast<int>(Material::MARBLE)] =    {"marble",  PhysicalState::HARD_SOLID   ,2.7*LITERS_PER_CUBIC_PX,-1.0};
-    dataOfMaterial[static_cast<int>(Material::FIBERGLASS)] = {"fiberglass",PhysicalState::HARD_SOLID,2.0*LITERS_PER_CUBIC_PX,-2.0};
-    dataOfMaterial[static_cast<int>(Material::DRUG)] =      {"drugs",   PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX,0.0};
-    dataOfMaterial[static_cast<int>(Material::WATER)] =     {"water",   PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX,0.5};
-    dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric",  PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX,0.1};
+    //                  		                            name       state                     density 					nutrition   strenght
+    dataOfMaterial[static_cast<int>(Material::FLESH)] =     {"meat",   PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX,1.0         ,0.5};
+    dataOfMaterial[static_cast<int>(Material::BONE)] =      {"bone",    PhysicalState::HARD_SOLID   ,0.7*LITERS_PER_CUBIC_PX,0.1        ,1.0};
+    dataOfMaterial[static_cast<int>(Material::IRON)] =      {"iron",    PhysicalState::HARD_SOLID   ,7.9*LITERS_PER_CUBIC_PX,-0.5       ,3.0};
+    dataOfMaterial[static_cast<int>(Material::PINEWOOD)] =  {"pine wood",PhysicalState::HARD_SOLID  ,0.5*LITERS_PER_CUBIC_PX,-0.1       ,2.0};
+    dataOfMaterial[static_cast<int>(Material::MARBLE)] =    {"marble",  PhysicalState::HARD_SOLID   ,2.7*LITERS_PER_CUBIC_PX,-1.0       ,3.0};
+    dataOfMaterial[static_cast<int>(Material::FIBERGLASS)] = {"fiberglass",PhysicalState::HARD_SOLID,2.0*LITERS_PER_CUBIC_PX,-2.0       ,2.0};
+    dataOfMaterial[static_cast<int>(Material::DRUG)] =      {"drugs",   PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX,0.0        ,0.3};
+    dataOfMaterial[static_cast<int>(Material::WATER)] =     {"water",   PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX,0.5        ,0.1};
+    dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric",  PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX,0.1        ,0.5};
+
+    //                                                          name            health    sprite_index
+    dataOfCreature[static_cast<int>(CreatureType::COP)] =       {"cop",         3000      ,0};
+    dataOfCreature[static_cast<int>(CreatureType::PLAYER)] =    {"poor bastard",10000     ,1};
+    dataOfCreature[static_cast<int>(CreatureType::COWBOY)] =    {"cowboy",      3000      ,2};
+    dataOfCreature[static_cast<int>(CreatureType::SHERLOK)] =   {"detective",   5000      ,3};
 }
 
-BGE_Object::BGE_Object() {
+BGE_Object::BGE_Object( Type objectType, Material objMaterial ) {
 	//Position is initialised to 0,0
 	//Content is initialised to empty.
-	//Set a default type.
-	type = BARREL;
+    type = objectType;
+    material = objMaterial;
+	health = getMaxHealth();
 	//Initialise interactions.
 	visible = true;
 	solid = true;
 	collides = true;
-	//Initialise health.
-	health = 3000;
 	//Direction initialisation.
 	angle = 0;
-	//Initialise pointers.
-	texture = NULL;
+	//Initialise messaging.
+	messageTexture = NULL;
+	messageTimer = 0;
 	//Initialise sprite flip (facing right).
 	flip = SDL_FLIP_NONE;
-	animCtr = 15;
+	animCtr = 15;//TODO porcodio che schifezza fai una classe per gli effetti.
 }
 
-BGE_Object::~BGE_Object() {}
+BGE_Object::~BGE_Object() {
+    if (messageTexture != NULL) {
+        delete messageTexture;
+        messageTexture = NULL;
+    }
+}
+
+void BGE_Object::update(float Dt) {
+    if (messageTexture != NULL) {
+        messageTimer -= Dt;
+        if (messageTimer < 0) {
+            delete messageTexture;
+            messageTexture = NULL;
+        }
+    }
+}
 
 void BGE_Object::hit(BGE_2DVect origin, float energy) {
     printf("You hit %s\n", getName().c_str());
@@ -83,15 +105,9 @@ void BGE_Object::applyCollision(std::vector<BGE_Object*> &others) {
 	for ( int i = 0; i < others.size(); i++ ) {
 		if ( this != others[i] ) {
 			if (circularCollision(others[i])) {
-#ifdef DEBUG_COLLISION
-				printf("circular collision: %s\n", others[i]->type.getName().c_str());
-#endif // DEBUG
 				// Checks and avoids overlapping if both objs are solid.
 				BGE_2DVect overlap;
 				if ( boxCollision(others[i], &overlap)) {
-#ifdef DEBUG_COLLISION
-					printf("box collision: %s\n", others[i]->type.getName().c_str());
-#endif // DEBUG
 					interact(others[i], overlap);
 				}
 			}
@@ -99,20 +115,31 @@ void BGE_Object::applyCollision(std::vector<BGE_Object*> &others) {
 	}
 }
 
+void BGE_Object::say(std::string message) {
+    if (messageTexture != NULL) {
+        delete messageTexture;
+    }
+    messageTexture = new BGE_Texture;
+    messageTexture->loadFromRenderedTextOnFrame(message, 0,0,0);
+    messageTimer = 2;
+}
+
 void BGE_Object::die() {
+    printf("%s died.\n", getName().c_str());
     engine->remove(this);
 }
 
 void BGE_Object::render() {
-    if (type == SPLINTERS) {
-        texture->renderSprite( position.x, position.y, static_cast<int>(material), 3-animCtr/4);
+    //TODO: create a class fo visual effects.
+    if (type == VIS_EFFECT) {
+        engine->splintersSheet.renderSprite( position.x, position.y, static_cast<int>(material), 3-animCtr/4);
         animCtr--;
         if (animCtr < 0) {
             engine->remove(this);
         }
     }
-    else {
-        texture->render( position.x, position.y, flip, angle*DEGREE_OVER_RADIANS);
+    if (messageTexture != NULL) {
+        messageTexture->render(position.x, position.y-getDepth());
     }
 }
 
@@ -168,10 +195,6 @@ BGE_2DRect BGE_Object::getCollisionBox() {
 	return collisionBox;
 }
 
-void BGE_Object::setTexture( BGE_Texture *ntexture ) {
-	texture = ntexture;
-}
-
 void BGE_Object::setAngle(float _angle) {
 	while (_angle > TWO_PI) {
 		_angle -= TWO_PI;
@@ -198,12 +221,20 @@ bool BGE_Object::isSolid() {
 	return solid;
 }
 
+float BGE_Object::getHealthPercent() {
+    return health/getMaxHealth()*100;
+}
+
 BGE_Object::Use BGE_Object::getUse() {
 	return dataOf[type].use;
 }
 
 float BGE_Object::getVolume() {
 	return dataOf[type].depth * dataOf[type].height * dataOf[type].width;
+}
+
+float BGE_Object::getDepth() {
+    return dataOf[static_cast<int>(type)].depth;
 }
 
 float BGE_Object::getMass() {
@@ -214,8 +245,16 @@ float BGE_Object::getNutrition() {
 	return getMass() * dataOfMaterial[static_cast<int>(material)].nutrition;
 }
 
+float BGE_Object::getMaxHealth() {
+    return dataOf[static_cast<int>(type)].baseHealth*dataOfMaterial[static_cast<int>(material)].strenght;
+}
+
 BGE_Object::PhysicalState BGE_Object::getPhysicalState() {
 	return dataOfMaterial[static_cast<int>(material)].state;
+}
+
+float BGE_Object::getReloadTime() {
+    return dataOf[static_cast<int>(type)].reloadTime;   //SIGSEGV segmentation fault. this == NULL
 }
 
 std::string BGE_Object::getName() {

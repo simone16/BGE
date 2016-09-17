@@ -19,6 +19,7 @@ struct SDL_Point;
 class BGE_Texture {
 	public:
 		static BGE_Engine *engine;
+		static SDL_Renderer *renderer;
 
 		BGE_Texture();
 		~BGE_Texture();
@@ -27,6 +28,8 @@ class BGE_Texture {
 		bool loadFromFile( std::string path, int keyRed = -1, int keyGreen = -1, int keyBlue = -1 );
 		//Creates image from text using the global font
 		bool loadFromRenderedText( std::string textureText, Uint8 red, Uint8 green, Uint8 blue );
+		//Creates image from text using the global font
+		bool loadFromRenderedTextOnFrame( std::string textureText, Uint8 red, Uint8 green, Uint8 blue);
 		//Deallocates texture
 		void free();
 
@@ -51,11 +54,11 @@ class BGE_Texture {
 		//Get image size
 		int getWidth();
 		int getHeight();
-	protected:
-	private:
+
 		//The actual hardware texture
 		SDL_Texture *texture;
-
+	protected:
+	private:
 		//Texture size
 		int sheetWidth;
 		int sheetHeight;

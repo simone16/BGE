@@ -1,6 +1,8 @@
 #ifndef BGE_2DVECT_H
 #define BGE_2DVECT_H
 
+#include <cstdint>
+
 class SDL_Point;
 
 class BGE_2DVect {
@@ -21,6 +23,11 @@ class BGE_2DVect {
 	BGE_2DVect operator * ( const double ) const;
 	float modulus() const;
 	float angle() const;
+	//Quadrant assumes integer values depending on angle
+	//    '.1.'
+	//	  2 * 0
+	//    .'3'.
+	uint8_t quadrant() const;
 
 	operator SDL_Point() const;
   protected:

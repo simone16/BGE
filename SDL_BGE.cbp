@@ -23,6 +23,22 @@
 					<Add option="-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" />
 				</Linker>
 			</Target>
+			<Target title="Debug">
+				<Option output="bin/Release/SDL_BasicGameEngine" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wfatal-errors" />
+					<Add option="-Wall" />
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -31,12 +47,17 @@
 		</Compiler>
 		<Unit filename="fnt/FreeMono.ttf" />
 		<Unit filename="fnt/FreeMonoBold.ttf" />
+		<Unit filename="img/hats.png" />
+		<Unit filename="img/items25x25.png" />
+		<Unit filename="img/items25x50.png" />
 		<Unit filename="img/itemsheet.png" />
 		<Unit filename="img/splinters.png" />
 		<Unit filename="img/stickman.png" />
+		<Unit filename="img/textFrame.png" />
 		<Unit filename="include/BGE_2DRect.h" />
 		<Unit filename="include/BGE_2DVect.h" />
 		<Unit filename="include/BGE_Creature.h" />
+		<Unit filename="include/BGE_Enemy.h" />
 		<Unit filename="include/BGE_Engine.h" />
 		<Unit filename="include/BGE_Item.h" />
 		<Unit filename="include/BGE_Object.h" />
@@ -52,6 +73,7 @@
 		<Unit filename="src/BGE_2DRect.cpp" />
 		<Unit filename="src/BGE_2DVect.cpp" />
 		<Unit filename="src/BGE_Creature.cpp" />
+		<Unit filename="src/BGE_Enemy.cpp" />
 		<Unit filename="src/BGE_Engine.cpp" />
 		<Unit filename="src/BGE_Item.cpp" />
 		<Unit filename="src/BGE_Object.cpp" />

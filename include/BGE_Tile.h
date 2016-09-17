@@ -8,7 +8,7 @@ class BGE_Tile : public BGE_Object {
     public:
         static const float SIDE;
 
-        BGE_Tile();
+        BGE_Tile( Material tileMaterial);
         virtual ~BGE_Tile();
 
         void render();

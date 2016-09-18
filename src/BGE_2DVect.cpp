@@ -58,6 +58,10 @@ BGE_2DVect BGE_2DVect::operator*( const double factor ) const {
 	return result;
 }
 
+bool BGE_2DVect::operator==(const BGE_2DVect refvect) const {
+    return (x == refvect.x) && (y == refvect.y);
+}
+
 float BGE_2DVect::modulus() const {
 	return std::sqrt( std::pow( x, 2 ) + std::pow( y, 2 ) );
 }

@@ -264,6 +264,21 @@ void BGE_Creature::remove( BGE_Item *item) {
 	}
 }
 
+float BGE_Creature::getUseDelayPercent() {
+	if (activeItem != NULL) {
+		float percent = useDelay/activeItem->getReloadTime()*100;
+		if (percent < 0) {
+			return 0;
+		}
+		else {
+			return percent;
+		}
+	}
+	else {
+		return 0;
+	}
+}
+
 float BGE_Creature::getMaxHealth() {
 	return dataOfCreature[static_cast<int>(creatureType)].health;
 }

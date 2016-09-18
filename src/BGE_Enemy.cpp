@@ -15,7 +15,7 @@ void BGE_Enemy::update( float Dt) {
         case CreatureType::COP: {
             BGE_Player *player = engine->getPlayer();
             bool attack = false;
-            if ((position - player->position).modulus() <= 100) {
+            if ((position - player->position).modulus() <= 400) {
                 //Sees the player.
                 BGE_2DVect playerRel;
                 playerRel = player->position -position;

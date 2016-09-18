@@ -226,51 +226,181 @@ bool BGE_Engine::load() {
     player->position.x = 50;
     player->position.y = 50;
 
-    //Load some enemies.
-    for (int i=0; i<5; i++) {
-        BGE_Enemy *enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
-        enemy->position.x = getRandomInt(0, 1000);
-        enemy->position.y = getRandomInt(0, 500);
-        enemy->target = enemy->position;
-        creatures.push_back(enemy);
+    //load building
+    loadWall(15,-10,10,true,BGE_Object::Material::PINEWOOD);
+    loadWall(0,0,17,true,BGE_Object::Material::PINEWOOD);
+    loadWall(19,0,16,true,BGE_Object::Material::PINEWOOD);
+    loadWall(0,10,27,true,BGE_Object::Material::PINEWOOD);
+    loadWall(15,20,3,true,BGE_Object::Material::PINEWOOD);
+    loadWall(20,20,7,true,BGE_Object::Material::PINEWOOD);
+    loadWall(15,30,20,true,BGE_Object::Material::PINEWOOD);
+    loadWall(33,10,2,true,BGE_Object::Material::PINEWOOD);
+    loadWall(33,20,2,true,BGE_Object::Material::PINEWOOD);
+    loadWall(0,0,10,false,BGE_Object::Material::PINEWOOD);
+    loadWall(15,-10,13,false,BGE_Object::Material::PINEWOOD);
+    loadWall(25,-10,13,false,BGE_Object::Material::PINEWOOD);
+    loadWall(15,5,25,false,BGE_Object::Material::PINEWOOD);
+    loadWall(25,5,23,false,BGE_Object::Material::PINEWOOD);
+    loadWall(35,0,30,false,BGE_Object::Material::PINEWOOD);
+    //check for duplicates
+    for (int i=0; i<tiles.size(); i++) {
+        for (int j=i+1; j<tiles.size(); j++) {
+            if (tiles[i]->position == tiles[j]->position) {
+                remove(tiles[i]);
+            }
+        }
     }
-    BGE_Enemy *walker = new BGE_Enemy(BGE_Object::CreatureType::COWBOY);
-    walker->position.x = -100;
-    walker->position.y = -100;
-    BGE_2DVect point (-300,-100);
-    walker->addCheckPoint(point);
-    point.y = -300;
-    walker->addCheckPoint(point);
-    point.x = -100;
-    point.y = -100;
-    walker->addCheckPoint(point);
-    creatures.push_back(walker);
+    updateVectors();
 
-    //Load some random objects.
-    for (int i=0; i<30; i++) {
-        BGE_Object::Type itemType = static_cast<BGE_Object::Type>(getRandomInt(0, BGE_Object::TOT-1));
-        BGE_Object::Material itemMaterial = static_cast<BGE_Object::Material>(getRandomInt(0, static_cast<int>(BGE_Object::Material::TOT)-1));
-        BGE_Item *item = new BGE_Item(itemType, itemMaterial);
-        item->position.x = getRandomInt(0, 1000);
-        item->position.y = getRandomInt(0, 500);
-        items.push_back(item);
-    }
-    //Load some rooms.
-    for (int i=0; i<5; i++) {
-        loadBuilding(i*8, 0, 7, 7, BGE_Object::Material::PINEWOOD);
-    }
-	//Load some testing items.
-	BGE_Item *item = new BGE_Item( BGE_Object::BARREL, BGE_Object::Material::PINEWOOD);
-	item->position.x = 50;
-	item->position.y = 200;
-	items.push_back(item);
-	for (int i=0; i<7; i++) {
-        BGE_Item *item2 = new BGE_Item( BGE_Object::STONE, BGE_Object::Material::MARBLE);
-        item2->position.x = getRandomInt(0, 1000);
-        item2->position.y = getRandomInt(0, 500);
-        items.push_back(item2);
-        item->add(item2);
-    }
+    //load enemies...
+    BGE_Enemy *enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 26*25;
+    enemy->position.y = 5*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    //with knifes...
+    BGE_Item *item = new BGE_Item(BGE_Object::KNIFE, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 26*25;
+    enemy->position.y = 12*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    item = new BGE_Item(BGE_Object::KNIFE, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 33*25;
+    enemy->position.y = 12*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    item = new BGE_Item(BGE_Object::KNIFE, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 26*25;
+    enemy->position.y = 22*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    //And swords...
+    item = new BGE_Item(BGE_Object::SWORD, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 33*25;
+    enemy->position.y = 22*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    item = new BGE_Item(BGE_Object::SWORD, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 17*25;
+    enemy->position.y = 12*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    //and GUNS!!
+    item = new BGE_Item(BGE_Object::GUN, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    item = new BGE_Item(BGE_Object::BULLETS, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 17*25;
+    enemy->position.y = 18*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    item = new BGE_Item(BGE_Object::GUN, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    item = new BGE_Item(BGE_Object::BULLETS, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 23*25;
+    enemy->position.y = 12*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    item = new BGE_Item(BGE_Object::GUN, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    item = new BGE_Item(BGE_Object::BULLETS, BGE_Object::Material::IRON);
+    items.push_back(item);
+    enemy->add(item);
+    enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+    enemy->position.x = 23*25;
+    enemy->position.y = 18*25;
+    enemy->target = enemy->position;
+    creatures.push_back(enemy);
+    item = new BGE_Item(BGE_Object::GUN, BGE_Object::Material::GOLD);
+    items.push_back(item);
+    enemy->add(item);
+    item = new BGE_Item(BGE_Object::BULLETS, BGE_Object::Material::GOLD);
+    items.push_back(item);
+    enemy->add(item);
+
+    //load items
+    item = new BGE_Item(BGE_Object::KNIFE, BGE_Object::Material::PINEWOOD);
+    item->position.x = 17*25;
+    item->position.y = -5*25;
+    items.push_back(item);
+    item = new BGE_Item(BGE_Object::BARREL, BGE_Object::Material::PINEWOOD);
+    item->position.x = 18*25;
+    item->position.y = -3*25;
+    items.push_back(item);
+    BGE_Item *cont = new BGE_Item(BGE_Object::GUN, BGE_Object::Material::IRON);
+    items.push_back(cont);
+    item->add(cont);
+    cont = new BGE_Item(BGE_Object::BULLETS, BGE_Object::Material::IRON);
+    items.push_back(cont);
+    item->add(cont);
+    cont = new BGE_Item(BGE_Object::BULLETS, BGE_Object::Material::MARBLE);
+    items.push_back(cont);
+    item->add(cont);
+
+//    //Load some enemies.
+//    for (int i=0; i<5; i++) {
+//        BGE_Enemy *enemy = new BGE_Enemy(BGE_Object::CreatureType::COP);
+//        enemy->position.x = getRandomInt(0, 1000);
+//        enemy->position.y = getRandomInt(0, 500);
+//        enemy->target = enemy->position;
+//        creatures.push_back(enemy);
+//    }
+//    BGE_Enemy *walker = new BGE_Enemy(BGE_Object::CreatureType::COWBOY);
+//    walker->position.x = -100;
+//    walker->position.y = -100;
+//    BGE_2DVect point (-300,-100);
+//    walker->addCheckPoint(point);
+//    point.y = -300;
+//    walker->addCheckPoint(point);
+//    point.x = -100;
+//    point.y = -100;
+//    walker->addCheckPoint(point);
+//    creatures.push_back(walker);
+//
+//    //Load some random objects.
+//    for (int i=0; i<30; i++) {
+//        BGE_Object::Type itemType = static_cast<BGE_Object::Type>(getRandomInt(0, BGE_Object::TOT-1));
+//        BGE_Object::Material itemMaterial = static_cast<BGE_Object::Material>(getRandomInt(0, static_cast<int>(BGE_Object::Material::TOT)-1));
+//        BGE_Item *item = new BGE_Item(itemType, itemMaterial);
+//        item->position.x = getRandomInt(0, 1000);
+//        item->position.y = getRandomInt(0, 500);
+//        items.push_back(item);
+//    }
+//	//Load some testing items.
+//	BGE_Item *item = new BGE_Item( BGE_Object::BARREL, BGE_Object::Material::PINEWOOD);
+//	item->position.x = 50;
+//	item->position.y = 200;
+//	items.push_back(item);
+//	for (int i=0; i<7; i++) {
+//        BGE_Item *item2 = new BGE_Item( BGE_Object::STONE, BGE_Object::Material::MARBLE);
+//        item2->position.x = getRandomInt(0, 1000);
+//        item2->position.y = getRandomInt(0, 500);
+//        items.push_back(item2);
+//        item->add(item2);
+//    }
 
 	return success;
 }
@@ -431,7 +561,7 @@ void BGE_Engine::start() {
         SDL_RenderFillRect( BGE_Texture::renderer, &progressBar);
         SDL_SetRenderDrawColor( BGE_Texture::renderer, 50, 50, 200, 200);
         progressBar.y += 20;
-        progressBar.w = 50;
+        progressBar.w = 100-player->getUseDelayPercent();
         SDL_RenderFillRect( BGE_Texture::renderer, &progressBar);
 
 		//Update screen
@@ -607,27 +737,16 @@ bool BGE_Engine::compareRenderLevel(BGE_Object *front, BGE_Object *back) {
 	return front->position.y < back->position.y;
 }
 
-void BGE_Engine::loadBuilding(int x, int y, int w, int h, BGE_Object::Material material) {
-    for (int i=0; i<h; i++) {
-		BGE_Tile *tile = new BGE_Tile( material );
-        tile->position.x = x*BGE_Tile::SIDE;
-        tile->position.y = (y+i)*BGE_Tile::SIDE;
-        tiles.push_back(tile);
-        tile = new BGE_Tile( material );
-        tile->position.x = (x+w-1)*BGE_Tile::SIDE;
-        tile->position.y = (y+i)*BGE_Tile::SIDE;
-        tiles.push_back(tile);
+void BGE_Engine::loadWall(int x, int y, int lenght, bool horizontal, BGE_Object::Material material) {
+    int *increment = &y;
+    if (horizontal) {
+        increment = &x;
     }
-    for (int i=1; i<w-1; i++) {
-		BGE_Tile *tile = new BGE_Tile( material );
-        tile->position.x = (x+i)*BGE_Tile::SIDE;
+    for (int i=0; i<lenght; i++) {
+        BGE_Tile *tile = new BGE_Tile( material );
+        tile->position.x = x*BGE_Tile::SIDE;
         tile->position.y = y*BGE_Tile::SIDE;
         tiles.push_back(tile);
-        if (i!=1) {
-			tile = new BGE_Tile( material );
-			tile->position.x = (x+i)*BGE_Tile::SIDE;
-			tile->position.y = (y+h-1)*BGE_Tile::SIDE;
-			tiles.push_back(tile);
-        }
+        (*increment)++;
     }
 }

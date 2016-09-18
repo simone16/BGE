@@ -15,7 +15,7 @@ class BGE_Enemy : public BGE_Creature {
 
     protected:
         //If not told otherwise, AI navigates the checkpoints (avoiding obstacles).
-		std::vector<BGE_2DVect> checkPoints;
+        std::vector<BGE_2DVect> checkPoints;
         //Points to the checkpoint which is being reached.
         std::vector<BGE_2DVect>::iterator currentCheckPoint;
     private:

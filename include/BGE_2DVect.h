@@ -21,6 +21,7 @@ class BGE_2DVect {
 	BGE_2DVect& operator += ( const BGE_2DVect );
 	BGE_2DVect& operator -= ( const BGE_2DVect );
 	BGE_2DVect operator * ( const double ) const;
+	bool operator == ( const BGE_2DVect ) const;
 	float modulus() const;
 	float angle() const;
 	//Quadrant assumes integer values depending on angle

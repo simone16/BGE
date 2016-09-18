@@ -72,6 +72,7 @@ class BGE_Object {
 			DRUG,
 			WATER,
 			FABRIC,
+			GOLD,
 			TOT
 		};
 		//State associated with each material.

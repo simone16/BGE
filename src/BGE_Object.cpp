@@ -48,6 +48,7 @@ void BGE_Object::init() {
     dataOfMaterial[static_cast<int>(Material::DRUG)] =      {"drugs",   PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX,0.0        ,0.3};
     dataOfMaterial[static_cast<int>(Material::WATER)] =     {"water",   PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX,0.5        ,0.1};
     dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric",  PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX,0.1        ,0.5};
+    dataOfMaterial[static_cast<int>(Material::GOLD)] =      {"gold",    PhysicalState::HARD_SOLID   ,19.3*LITERS_PER_CUBIC_PX,0.0       ,1.0};
 
     //                                                          name            health    sprite_index
     dataOfCreature[static_cast<int>(CreatureType::COP)] =       {"cop",         3000      ,0};

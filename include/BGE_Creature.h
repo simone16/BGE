@@ -35,6 +35,7 @@ class BGE_Creature : public BGE_Item {
 		void add( BGE_Item *item);
 		void remove( BGE_Item *item);
 
+		float getUseDelayPercent();
 		float getMaxHealth();
 		std::string getName();
 

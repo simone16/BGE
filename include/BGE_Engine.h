@@ -109,7 +109,7 @@ class BGE_Engine {
 		BGE_2DRect getViewport();
 		static bool compareRenderLevel(BGE_Object *front, BGE_Object *back);
 
-		void loadBuilding(int x, int y, int w, int h, BGE_Object::Material material);
+		void loadWall(int x, int y, int lenght, bool horizontal, BGE_Object::Material material);
 };
 
 #endif // GAME_H

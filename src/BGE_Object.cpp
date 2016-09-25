@@ -11,7 +11,6 @@
 // Contains global preprocessor defines.
 #include <flags.h>
 
-const float BGE_Object::SPEED = 240;
 BGE_Engine *BGE_Object::engine = NULL;
 const float BGE_Object::TWO_PI = 6.283185307;
 const float BGE_Object::DEGREE_OVER_RADIANS = 57.29577951;
@@ -50,11 +49,11 @@ void BGE_Object::init() {
     dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric",  PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX,0.1        ,0.5};
     dataOfMaterial[static_cast<int>(Material::GOLD)] =      {"gold",    PhysicalState::HARD_SOLID   ,19.3*LITERS_PER_CUBIC_PX,0.0       ,1.0};
 
-    //                                                          name            health    sprite_index
-    dataOfCreature[static_cast<int>(CreatureType::COP)] =       {"cop",         3000      ,0};
-    dataOfCreature[static_cast<int>(CreatureType::PLAYER)] =    {"poor bastard",10000     ,1};
-    dataOfCreature[static_cast<int>(CreatureType::COWBOY)] =    {"cowboy",      3000      ,2};
-    dataOfCreature[static_cast<int>(CreatureType::SHERLOK)] =   {"detective",   5000      ,3};
+    //                                                          name            health  viewFld runSp   walkSp   sprite_index
+    dataOfCreature[static_cast<int>(CreatureType::COP)] =       {"cop",         3000    ,400    ,120    ,50      ,0};
+    dataOfCreature[static_cast<int>(CreatureType::PLAYER)] =    {"poor bastard",10000   ,400    ,240    ,240     ,1};
+    dataOfCreature[static_cast<int>(CreatureType::COWBOY)] =    {"cowboy",      3000    ,400    ,100    ,40      ,2};
+    dataOfCreature[static_cast<int>(CreatureType::SHERLOK)] =   {"detective",   5000    ,200    ,100    ,30      ,3};
 }
 
 BGE_Object::BGE_Object( Type objectType, Material objMaterial ) {
@@ -94,8 +93,10 @@ void BGE_Object::update(float Dt) {
     }
 }
 
-void BGE_Object::hit(BGE_2DVect origin, float energy) {
-    printf("You hit %s\n", getName().c_str());
+void BGE_Object::hit(BGE_Object* origin, float energy) {
+#ifdef DEBUG
+    printf("%s hit %s\n", origin->getName().c_str(), getName().c_str());
+#endif // DEBUG
 	health -= energy;
 	if (health <= 0) {
         die();
@@ -126,7 +127,14 @@ void BGE_Object::say(std::string message) {
 }
 
 void BGE_Object::die() {
-    printf("%s died.\n", getName().c_str());
+#ifdef DEBUG
+    if (type == CREATURE) {
+        printf("%s died.\n", getName().c_str());
+    }
+    else {
+        printf("%s destroyed.\n", getName().c_str());
+    }
+#endif // DEBUG
     engine->remove(this);
 }
 

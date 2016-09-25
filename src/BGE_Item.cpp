@@ -106,9 +106,9 @@ void BGE_Item::interact(BGE_Object* other, BGE_2DVect overlap) {
     }
 }
 
-void BGE_Item::hit(BGE_2DVect origin, float energy) {
+void BGE_Item::hit(BGE_Object* origin, float energy) {
     BGE_Object::hit(origin, energy);
-    BGE_2DVect effect = position - origin;
+    BGE_2DVect effect = position - origin->position;
     effect.setPolar( std::sqrt(2*energy/getMass()), effect.angle());
     speed += effect;
 }

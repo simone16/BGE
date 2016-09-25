@@ -639,6 +639,14 @@ BGE_Player *BGE_Engine::getPlayer() {
     return player;
 }
 
+std::vector<BGE_Enemy *> BGE_Engine::getAICreatures() {
+	std::vector<BGE_Enemy *> list (creatures.size());
+	for (int i=0; i<creatures.size(); i++) {
+        list[i] = static_cast<BGE_Enemy*>(creatures[i]);
+	}
+	return list;
+}
+
 std::vector<BGE_Object *> BGE_Engine::getCollidingObjects() {
 	std::vector<BGE_Object *> colliders = creatures;
 	colliders.insert(colliders.end(), items.begin(), items.end());

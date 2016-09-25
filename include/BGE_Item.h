@@ -26,7 +26,7 @@ class BGE_Item : public BGE_Object {
         //Called when collision is detected with other.
         virtual void interact( BGE_Object * other, BGE_2DVect overlap);
         //Called when this is hit.
-        virtual void hit(BGE_2DVect origin, float energy);
+        virtual void hit(BGE_Object* origin, float energy);
         //Used to eliminate object.
         virtual void die();
         //Tells this item that it is contained in another.

@@ -1,6 +1,7 @@
 #include "BGE_Creature.h"
 
 #include "BGE_Engine.h"
+#include <BGE_Enemy.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -147,8 +148,18 @@ void BGE_Creature::interact(BGE_Object *other, BGE_2DVect overlap) {
     say(message);
 }
 
-void BGE_Creature::hit(BGE_2DVect origin, float energy) {
+void BGE_Creature::hit(BGE_Object *origin, float energy) {
+	//Affect health
 	BGE_Object::hit( origin, energy);
+	//Scream in pain
+    std::vector<BGE_Enemy *> creatures = engine->getAICreatures();
+    for (std::vector<BGE_Enemy *>::iterator creature = creatures.begin();
+			creature < creatures.end(); creature++) {
+        //If creature is seeing this dying (what an orrible sight!)
+        if ((*creature)->canSee(this)) {
+			(*creature)->notifyHit(origin, this);
+        }
+	}
 }
 
 void BGE_Creature::use() {
@@ -172,7 +183,7 @@ void BGE_Creature::use() {
 				BGE_2DVect collisionPoint;
 				BGE_Object *collisionObj = NULL;
 				if (segmentCollision(position, range, &collisionObj, &collisionPoint)) {
-					collisionObj->hit(position, 2000);
+					collisionObj->hit(this, 2000);
 					BGE_Object *splinters = new BGE_Object( VIS_EFFECT, collisionObj->material);
 					splinters->position = collisionPoint;
 					engine->add(splinters);
@@ -192,7 +203,7 @@ void BGE_Creature::use() {
 								BGE_2DVect collisionPoint;
 								BGE_Object *collisionObj = NULL;
 								if (segmentCollision(position, bulletEnd, &collisionObj, &collisionPoint)) {
-									collisionObj->hit(position, 2000);
+									collisionObj->hit(this, 2000);
 									BGE_Object *splinters = new BGE_Object( VIS_EFFECT, collisionObj->material);
 									splinters->position = collisionPoint;
 									engine->add(splinters);
@@ -264,6 +275,20 @@ void BGE_Creature::remove( BGE_Item *item) {
 	}
 }
 
+bool BGE_Creature::canSee(BGE_Object* target) {
+	//Check target is within view field
+	if ((position - target->position).modulus() <= getViewField()) {
+		BGE_Object *firstCollision;
+		BGE_2DVect collPnt;
+		segmentCollision(position, target->position, &firstCollision, &collPnt);
+		//If the first obstruction is the target, vision is possible.
+		return firstCollision == target;
+	}
+	else {
+		return false;
+	}
+}
+
 float BGE_Creature::getUseDelayPercent() {
 	if (activeItem != NULL) {
 		float percent = useDelay/activeItem->getReloadTime()*100;
@@ -281,6 +306,10 @@ float BGE_Creature::getUseDelayPercent() {
 
 float BGE_Creature::getMaxHealth() {
 	return dataOfCreature[static_cast<int>(creatureType)].health;
+}
+
+float BGE_Creature::getViewField() {
+	return getData().viewField;
 }
 
 std::string BGE_Creature::getName() {
@@ -315,4 +344,8 @@ bool BGE_Creature::segmentCollision(BGE_2DVect start, BGE_2DVect end, BGE_Object
 	else {
 		return false;
 	}
+}
+
+BGE_Object::CreatureData BGE_Creature::getData() {
+    return dataOfCreature[static_cast<int>(creatureType)];
 }

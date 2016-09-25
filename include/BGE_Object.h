@@ -15,7 +15,6 @@ struct Mix_Chunk;
 class BGE_Object {
 	public:
 		static const int CIRCULAR_COLLISION_PADDING = 2;
-		static const float SPEED;	//TODO what's this?
 		static const float TWO_PI;
 		static const float DEGREE_OVER_RADIANS;
 		static const float LITERS_PER_CUBIC_PX;
@@ -104,6 +103,9 @@ class BGE_Object {
         struct CreatureData {
             std::string name;
             float health;
+            float viewField;    //Radius [px]
+            float runSpeed;     // [px/S]
+            float walkSpeed;    // [px/S]
             int spriteIndex;    //used to find hats.
         };
 
@@ -114,7 +116,7 @@ class BGE_Object {
 		virtual ~BGE_Object();
 
 		virtual void update(float Dt);
-		virtual void hit( BGE_2DVect origin, float energy);
+		virtual void hit( BGE_Object* origin, float energy);
 		//Handles collisions.
 		//Note it has to be symmetrical (called once for every two objects, see engine.start()).
 		virtual void applyCollision( std::vector<BGE_Object *> &others );

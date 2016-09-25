@@ -4,6 +4,10 @@
 #include <BGE_Item.h>
 #include <BGE_Player.h>
 
+#include <algorithm>
+
+const float BGE_Enemy::CP_TOLERANCE = 10;
+
 BGE_Enemy::BGE_Enemy( CreatureType crtType ):
     BGE_Creature( crtType ) {
 }
@@ -11,48 +15,57 @@ BGE_Enemy::BGE_Enemy( CreatureType crtType ):
 BGE_Enemy::~BGE_Enemy() {}
 
 void BGE_Enemy::update( float Dt) {
-    switch (creatureType) {
-        case CreatureType::COP: {
-            BGE_Player *player = engine->getPlayer();
-            bool attack = false;
-            if ((position - player->position).modulus() <= 400) {
-                //Sees the player.
-                BGE_2DVect playerRel;
-                playerRel = player->position -position;
-                speed.setPolar(SPEED/2, playerRel.angle());
-                target = player->position;
+    bool attack = false;
+    //First: look for blackListed objects
+    if (!blackList.empty()) {
+        //For each blacklisted object
+        for (std::vector<BGE_Object*>::iterator badGuy = blackList.begin();
+                badGuy < blackList.end(); badGuy++) {
+            //If badGuy is visible
+            if (canSee(*badGuy)) {
+                BGE_2DVect badGuyRelPos = (*badGuy)->position -position;
+                speed.setPolar(getData().runSpeed, badGuyRelPos.angle());
+                target = (*badGuy)->position;
                 attack = true;
+                //No need to check for other blaklisted objs
+                break;
             }
-            else if ((position - target).modulus() <= 10) {
-                //Target reached.
-                BGE_2DVect newTarget;
-                newTarget.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
-                speed.setPolar(SPEED/5, newTarget.angle());
-                target = position + newTarget;
-            }
-            BGE_Creature::update(Dt);
-            if (attack) {
-                use();
-            }
-            break;
         }
-        case CreatureType::COWBOY: {
-            if (!checkPoints.empty()) {
-                BGE_2DVect relativeCP = *currentCheckPoint - position;
-                if (relativeCP.modulus() <= 10) {
-                    //Checkpoint reached.
-                    currentCheckPoint++;
-                    if (currentCheckPoint == checkPoints.end()) {
-                        currentCheckPoint = checkPoints.begin();
-                    }
+    }
+    //Second: patrol checkpoints
+    else if (!checkPoints.empty()) {
+        BGE_2DVect CheckPntRelPos = *currentCheckPoint - position;
+        BGE_Object *firstCollision;
+        BGE_2DVect collPnt;
+        //if path to checkpoint is free
+        if (!segmentCollision( position, *currentCheckPoint, &firstCollision, &collPnt)) {
+            //if checkpoint reached
+            if (CheckPntRelPos.modulus() <= CP_TOLERANCE) {
+                //activate next checkpoint
+                currentCheckPoint++;
+                if (currentCheckPoint == checkPoints.end()) {
+                    currentCheckPoint = checkPoints.begin();
                 }
-                //Go towards checkpoint.
-                speed.setPolar(SPEED/5, relativeCP.angle());
             }
-            else {
-            }
-            BGE_Creature::update(Dt);
+            //Go towards checkpoint
+            speed.setPolar(getData().walkSpeed, CheckPntRelPos.angle());
         }
+        else {
+            //Path to checkpoint is not free.
+        }
+    }
+    //Third: move to a random place
+    else {
+        if ((position - target).modulus() <= CP_TOLERANCE) {
+            //Target reached.
+            target.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
+            speed.setPolar(getData().walkSpeed, target.angle());
+            target += position;
+        }
+    }
+    BGE_Creature::update(Dt);
+    if (attack) {
+        use();
     }
 }
 
@@ -60,8 +73,30 @@ void BGE_Enemy::interact(BGE_Object* other, BGE_2DVect overlap) {
     BGE_Creature::interact(other, overlap);
     BGE_2DVect newTarget;
     newTarget.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
-    speed.setPolar(SPEED/5, newTarget.angle());
+    speed.setPolar(getData().walkSpeed, newTarget.angle());
     target = position + newTarget;
+}
+
+void BGE_Enemy::hit(BGE_Object* origin, float energy) {
+    BGE_Creature::hit(origin, energy);
+    notifyHit(origin, this);
+}
+
+void BGE_Enemy::notifyHit(BGE_Object* attacker, BGE_Creature* victim) {
+    //If this is a cop
+    if (creatureType == CreatureType::COP) {
+        //Add attacker to blacklist
+        std::vector<BGE_Object*>::iterator index = std::find( blackList.begin(), blackList.end(), attacker);
+        if (index == blackList.end()) {
+            blackList.push_back(attacker);
+        }
+    }
+    else {
+        //Run, you fool!
+        target.setPolar(engine->getNormalRandom(300, 100), (position - attacker->position).angle());
+        speed.setPolar(getData().runSpeed, target.angle());
+        target += position;
+    }
 }
 
 void BGE_Enemy::addCheckPoint(BGE_2DVect checkPoint) {

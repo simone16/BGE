@@ -17,6 +17,7 @@
 #include <random>
 
 class BGE_Creature;
+class BGE_Enemy;
 class BGE_Player;
 
 struct SDL_Window;
@@ -56,6 +57,8 @@ class BGE_Engine {
 		BGE_2DVect getViewportOffset();
 
 		BGE_Player * getPlayer();
+		//Returns a list of the creatures loaded.
+		std::vector<BGE_Enemy *> getAICreatures();
 		//Returns a list of loaded collideable objects.
         std::vector<BGE_Object *> getCollidingObjects();
         //Add an object to the current level.

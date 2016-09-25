@@ -23,7 +23,7 @@ class BGE_Creature : public BGE_Item {
 
 		virtual void update(float Dt);
 		virtual void interact(BGE_Object * other, BGE_2DVect overlap);
-		virtual void hit(BGE_2DVect origin, float energy);
+		virtual void hit(BGE_Object* origin, float energy);
 		//The following refer to activeItem.
 		void use();
 		void dispose();
@@ -35,8 +35,10 @@ class BGE_Creature : public BGE_Item {
 		void add( BGE_Item *item);
 		void remove( BGE_Item *item);
 
+		bool canSee(BGE_Object* target);
 		float getUseDelayPercent();
 		float getMaxHealth();
+		float getViewField();
 		std::string getName();
 
 		BGE_2DVect target;
@@ -52,6 +54,7 @@ class BGE_Creature : public BGE_Item {
 
         //Detects the first object on a sigle segment path.
         bool segmentCollision(BGE_2DVect start, BGE_2DVect end, BGE_Object **firstCollision, BGE_2DVect *collision);
+        CreatureData getData();
     private:
 };
 

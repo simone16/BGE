@@ -1,10 +1,3 @@
-#
-# 'make depend' uses makedepend to automatically generate dependencies 
-#               (dependencies are added to end of Makefile)
-# 'make'        build executable file 'mycc'
-# 'make clean'  removes all .o and executable files
-#
-
 # define the C++ compiler to use
 CC = g++
 
@@ -13,7 +6,7 @@ CFLAGS = -std=c++11 -O2
 
 # define any directories containing header files other than /usr/include
 #
-INCLUDES = -Iinclude
+INCLUDES = -Iinclude -Iinclude_release
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify

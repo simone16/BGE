@@ -41,10 +41,9 @@ class BGE_Object {
         //Use determines what Player::use does
         enum class Use : int {
             WEAPON,         //Throw it.
-            HANDHELD_WEAPON,//Spawn in front of player and then hide again, wound nearby creatures.
-            SHOOTING_WEAPON,//As above, but cause another object to be thrown.
+            HANDHELD_WEAPON,//Wound nearby creatures.
+            SHOOTING_WEAPON,//Cause another object to be thrown.
             FOOD,           //Eat.
-            TRANSPORTATION, //Get inside.
             NONE            //Not directly usable.
         };
         //Used to hold the values associated with each type of object.
@@ -104,6 +103,7 @@ class BGE_Object {
             std::string name;
             float health;
             float viewField;    //Radius [px]
+            float aimAccuracy;  //stdev [rad]
             float runSpeed;     // [px/S]
             float walkSpeed;    // [px/S]
             int spriteIndex;    //used to find hats.

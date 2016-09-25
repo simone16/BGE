@@ -24,7 +24,32 @@ void BGE_Enemy::update( float Dt) {
             //If badGuy is visible
             if (canSee(*badGuy)) {
                 BGE_2DVect badGuyRelPos = (*badGuy)->position -position;
-                speed.setPolar(getData().runSpeed, badGuyRelPos.angle());
+                //Behaviour depends on activeItem
+                switch (activeItem->getUse()) {
+                    case BGE_Object::Use::FOOD : {
+                        //If activeItem is FOOD, change it
+                        std::vector<BGE_Item*>::iterator item = content.begin();
+                        while (item != content.end()) {
+                            if ((*item)->getUse() != BGE_Object::Use::FOOD) {
+                                activeItem = (*item);
+                                break;
+                            }
+                            item++;
+                        }
+                        if (item == content.end()) {
+                            //Do nothing if this only has food
+                            break;
+                        }
+                    }
+                    case BGE_Object::Use::HANDHELD_WEAPON :
+                        //if activeItem is handheld, engage close proximity combat
+                        speed.setPolar(getData().runSpeed, badGuyRelPos.angle());
+                        break;
+                    default :
+                        //shoot/throw from the distance
+                        speed.x = 0;
+                        speed.y = 0;
+                }
                 target = (*badGuy)->position;
                 attack = true;
                 //No need to check for other blaklisted objs
@@ -61,6 +86,9 @@ void BGE_Enemy::update( float Dt) {
             target.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
             speed.setPolar(getData().walkSpeed, target.angle());
             target += position;
+        }
+        else if (speed.x == 0 && speed.y == 0) {
+            speed.setPolar(getData().walkSpeed, (target-position).angle());
         }
     }
     BGE_Creature::update(Dt);

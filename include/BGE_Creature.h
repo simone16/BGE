@@ -25,7 +25,7 @@ class BGE_Creature : public BGE_Item {
 		virtual void interact(BGE_Object * other, BGE_2DVect overlap);
 		virtual void hit(BGE_Object* origin, float energy);
 		//The following refer to activeItem.
-		void use();
+		virtual void use();
 		void dispose();
 
         //Uses stored mouse position to adjust the angle;

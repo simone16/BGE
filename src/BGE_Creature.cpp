@@ -165,20 +165,22 @@ void BGE_Creature::hit(BGE_Object *origin, float energy) {
 void BGE_Creature::use() {
 	if (activeItem != NULL && useDelay <= 0) {
 		useDelay = activeItem->getReloadTime();	//In some cases activeItem is NULL at the end of use().
+		//Avoid surgical precision when using items
+		float useAngle = angle + engine->getNormalRandom(0,getData().aimAccuracy);
 		switch (activeItem->getUse()) {
 			case BGE_Object::Use::WEAPON: {
 				//Throw it.
 				//Place object outside collision range.
-				activeItem->position.setPolar(getCollisionRadius() + activeItem->getCollisionRadius()+2, angle);
+				activeItem->position.setPolar(getCollisionRadius() + activeItem->getCollisionRadius()+2, useAngle);
 				activeItem->position += position;
 				//Set object speed according to throw strenght.
-				activeItem->speed.setPolar( std::sqrt(2*THROW_ENERGY/activeItem->getMass()), angle);
+				activeItem->speed.setPolar( std::sqrt(2*THROW_ENERGY/activeItem->getMass()), useAngle);
 				remove(activeItem);
 				break;
 			}
 			case BGE_Object::Use::HANDHELD_WEAPON: {
 				BGE_2DVect range;
-				range.setPolar(activeItem->getCollisionRadius()*2+getCollisionRadius(), angle);
+				range.setPolar(activeItem->getCollisionRadius()*2+getCollisionRadius(), useAngle);
 				range += position;
 				BGE_2DVect collisionPoint;
 				BGE_Object *collisionObj = NULL;
@@ -198,7 +200,7 @@ void BGE_Creature::use() {
 						for (int i=0; i<content.size(); i++) {
 							if (content[i]->type == BGE_Object::BULLETS) {
 								BGE_2DVect bulletEnd;
-								bulletEnd.setPolar(3000, angle);
+								bulletEnd.setPolar(3000, useAngle);
 								bulletEnd += position;
 								BGE_2DVect collisionPoint;
 								BGE_Object *collisionObj = NULL;
@@ -217,8 +219,6 @@ void BGE_Creature::use() {
 							}
 						}
 						break;
-					default:
-						break;
 				}
 				break;
 			case BGE_Object::Use::FOOD: {
@@ -229,10 +229,6 @@ void BGE_Creature::use() {
 				remove(activeItem);
 				break;
 			}
-			case BGE_Object::Use::TRANSPORTATION:
-				break;
-			default:
-				break;
 		}
 	}
 }

@@ -49,11 +49,11 @@ void BGE_Object::init() {
     dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric",  PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX,0.1        ,0.5};
     dataOfMaterial[static_cast<int>(Material::GOLD)] =      {"gold",    PhysicalState::HARD_SOLID   ,19.3*LITERS_PER_CUBIC_PX,0.0       ,1.0};
 
-    //                                                          name            health  viewFld runSp   walkSp   sprite_index
-    dataOfCreature[static_cast<int>(CreatureType::COP)] =       {"cop",         3000    ,400    ,120    ,50      ,0};
-    dataOfCreature[static_cast<int>(CreatureType::PLAYER)] =    {"poor bastard",10000   ,400    ,240    ,240     ,1};
-    dataOfCreature[static_cast<int>(CreatureType::COWBOY)] =    {"cowboy",      3000    ,400    ,100    ,40      ,2};
-    dataOfCreature[static_cast<int>(CreatureType::SHERLOK)] =   {"detective",   5000    ,200    ,100    ,30      ,3};
+    //                                                          name            health  viewFld aimAcc       runSp   walkSp   sprite_index
+    dataOfCreature[static_cast<int>(CreatureType::COP)] =       {"cop",         3000    ,400    ,TWO_PI*0.02 ,120    ,50      ,0};
+    dataOfCreature[static_cast<int>(CreatureType::PLAYER)] =    {"poor bastard",10000   ,400    ,0.0         ,240    ,240     ,1};
+    dataOfCreature[static_cast<int>(CreatureType::COWBOY)] =    {"cowboy",      3000    ,400    ,TWO_PI*0.03 ,100    ,40      ,2};
+    dataOfCreature[static_cast<int>(CreatureType::SHERLOK)] =   {"detective",   5000    ,200    ,TWO_PI*0.07 ,100    ,30      ,3};
 }
 
 BGE_Object::BGE_Object( Type objectType, Material objMaterial ) {

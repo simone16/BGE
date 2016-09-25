@@ -9,17 +9,12 @@
 
 1) Make sure to have SDL2 installed, on Ubuntu 16.04 you can install all the required
 	libraries with:
-		
+
 		sudo apt-get install libsdl2-2.0-0 libsdl2-dev libsdl2-image-2.0-0 libsdl2-image-dev libsdl2-mixer-2.0-0 libsdl2-mixer-dev libsdl2-ttf-2.0-0 libsdl2-ttf-dev
 
 2) Build the project with:
 
-		cd "BGE_folder"
+		cd $"BGE_folder"
 		make
 
 3) Run BGE.
-
-Note: to remove debugging infos from the screen comment the appropriate lines
-	in include/flags.h then:
-		make clean
-		make

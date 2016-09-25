@@ -11,9 +11,11 @@ class BGE_Player : public BGE_Creature {
         void handleEvent( SDL_Event &e );
 		void handleEventJoy( SDL_Event &e );
 
+		void update(float Dt);
+
 		void die();
     protected:
-
+        bool mouseButtonDown;
     private:
 };
 

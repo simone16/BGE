@@ -7,6 +7,7 @@
 
 BGE_Player::BGE_Player():
 	BGE_Creature( CreatureType::PLAYER ){
+	mouseButtonDown = false;
 }
 
 BGE_Player::~BGE_Player() {}
@@ -16,6 +17,7 @@ void BGE_Player::handleEvent( SDL_Event &e ) {
 	if ( e.type == SDL_MOUSEBUTTONDOWN ) {
 		if ( e.button.button == SDL_BUTTON_LEFT) {
 			use();
+			mouseButtonDown = true;
 		}
 		else if (e.button.button == SDL_BUTTON_RIGHT) {
 			dispose();
@@ -24,6 +26,11 @@ void BGE_Player::handleEvent( SDL_Event &e ) {
 			printf("HP: %f\n", health);
 			printf("position: %i, %i\n", int(position.x), int(position.y));
 
+		}
+	}
+	else if ( e.type == SDL_MOUSEBUTTONUP ) {
+		if ( e.button.button == SDL_BUTTON_LEFT) {
+			mouseButtonDown = false;
 		}
 	}
 	//If mouse is moved
@@ -160,6 +167,13 @@ void BGE_Player::handleEventJoy( SDL_Event &e ) {
 						break;
 				}
 		}
+}
+
+void BGE_Player::update(float Dt) {
+	BGE_Creature::update(Dt);
+    if (useDelay <= 0 && mouseButtonDown) {
+		use();
+    }
 }
 
 void BGE_Player::die() {

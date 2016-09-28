@@ -10,6 +10,9 @@ class BGE_Particle : public BGE_Moveable {
 	BGE_Particle( Material material );
 	virtual ~BGE_Particle();
 
+	//Factory method for generating particles for an explosion.
+	static void explosion(BGE_2DVect position, float energy, Material mat, float direction = 0, float width = TWO_PI);
+
 	void update( float Dt);
 	void interact( BGE_Object *other, BGE_2DVect overlap);
 

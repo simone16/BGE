@@ -355,6 +355,14 @@ bool BGE_Engine::load() {
     item->position.x = 17*25;
     item->position.y = -5*25;
     items.push_back(item);
+    item = new BGE_Item(BGE_Object::BOTTLE, BGE_Object::Material::WATER);
+    item->position.x = 19*25;
+    item->position.y = -5*25;
+    items.push_back(item);
+    item = new BGE_Item(BGE_Object::BOTTLE, BGE_Object::Material::WATER);
+    item->position.x = 20*25;
+    item->position.y = -5*25;
+    items.push_back(item);
     item = new BGE_Item(BGE_Object::BARREL, BGE_Object::Material::PINEWOOD);
     item->position.x = 18*25;
     item->position.y = -3*25;

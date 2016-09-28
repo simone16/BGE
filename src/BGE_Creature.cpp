@@ -1,6 +1,6 @@
-#include "BGE_Creature.h"
+#include <BGE_Creature.h>
 
-#include "BGE_Engine.h"
+#include <BGE_Engine.h>
 #include <BGE_Enemy.h>
 #include <BGE_Particle.h>
 
@@ -187,9 +187,11 @@ void BGE_Creature::use() {
 				BGE_Object *collisionObj = NULL;
 				if (segmentCollision(position, range, &collisionObj, &collisionPoint)) {
 					collisionObj->hit(this, 2000);
-					BGE_Particle *splinters = new BGE_Particle(collisionObj->material );
-					splinters->position = collisionPoint;
-					engine->add(splinters);
+					BGE_Particle::explosion( collisionPoint,
+											2000,
+											collisionObj->material,
+											angle,
+											TWO_PI*0.5);
 				}
 				weaponAnimCtr = 5*WALK_FRAME_REPEAT;
 				break;
@@ -207,15 +209,20 @@ void BGE_Creature::use() {
 								BGE_Object *collisionObj = NULL;
 								if (segmentCollision(position, bulletEnd, &collisionObj, &collisionPoint)) {
 									collisionObj->hit(this, 2000);
-									BGE_Particle *splinters = new BGE_Particle(collisionObj->material);
-									splinters->position = collisionPoint;
-									engine->add(splinters);
+									BGE_Particle::explosion(collisionPoint,
+															2000,
+															collisionObj->material,
+															angle+TWO_PI/2,
+															TWO_PI*0.3);
 								}
-								BGE_Particle *splinters = new BGE_Particle(Material::IRON);
-								splinters->position.setPolar(30, angle);
-								splinters->position += position;
-								splinters->speed.setPolar(300, angle);
-								engine->add(splinters);
+								BGE_2DVect gunPos;
+								gunPos.setPolar(33, angle);
+								gunPos += position;
+								BGE_Particle::explosion(gunPos,
+														1500,
+														Material::IRON,
+														angle,
+														TWO_PI*0.1);
 								weaponAnimCtr = 5*WALK_FRAME_REPEAT;
 								break;
 							}

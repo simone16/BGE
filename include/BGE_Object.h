@@ -85,6 +85,7 @@ class BGE_Object {
         struct MaterialData {
             std::string name;
             SDL_Color color;     // for procedural generation of sprites
+            uint8_t tileMaskIndex;
             PhysicalState state;
             float density;       // [kg/px3]
             float nutrition;     // [HP/kg] negative -> toxic.

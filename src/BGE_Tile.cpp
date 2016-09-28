@@ -16,5 +16,7 @@ BGE_Tile::BGE_Tile( Material tileMaterial):
 BGE_Tile::~BGE_Tile() {}
 
 void BGE_Tile::render() {
-    engine->tileSheet.renderSprite(position.x, position.y, static_cast<int>(material), 0);
+    SDL_Color color = getColor();
+    engine->tileSheet.setColor(color.r, color.g, color.b);
+    engine->tileSheet.renderSprite(position.x, position.y, getMaterialData().tileMaskIndex, 0);
 }

@@ -106,6 +106,7 @@ class BGE_Object {
             float health;
             float viewField;    //Radius [px]
             float aimAccuracy;  //stdev [rad]
+            float responseTime; //after triggering use(), creatures wait this much to use() [S]
             float runSpeed;     // [px/S]
             float walkSpeed;    // [px/S]
             int spriteIndex;    //used to find hats.
@@ -184,8 +185,13 @@ class BGE_Object {
 		float messageTimer;
 
 		//Inline functions to access raw data
-		TypeData getData();
-		MaterialData getMaterialData();
+		inline TypeData getData() {
+            return dataOf[static_cast<int>(type)];
+        }
+
+        inline MaterialData getMaterialData() {
+            return dataOfMaterial[static_cast<int>(material)];
+        }
 		//Data relative to object type.
 		static TypeData dataOf[];
 		//Data relative to object material.

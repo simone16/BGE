@@ -10,91 +10,101 @@ const float BGE_Enemy::CP_TOLERANCE = 10;
 
 BGE_Enemy::BGE_Enemy( CreatureType crtType ):
     BGE_Creature( crtType ) {
+    useTriggered = false;
+    usePreDelay = 0;
 }
 
 BGE_Enemy::~BGE_Enemy() {}
 
 void BGE_Enemy::update( float Dt) {
-    bool attack = false;
-    //First: look for blackListed objects
-    if (!blackList.empty()) {
-        //For each blacklisted object
-        for (std::vector<BGE_Object*>::iterator badGuy = blackList.begin();
-                badGuy < blackList.end(); badGuy++) {
-            //If badGuy is visible
-            if (canSee(*badGuy)) {
-                BGE_2DVect badGuyRelPos = (*badGuy)->position -position;
-                //Behaviour depends on activeItem
-                switch (activeItem->getUse()) {
-                    case BGE_Object::Use::FOOD : {
-                        //If activeItem is FOOD, change it
-                        std::vector<BGE_Item*>::iterator item = content.begin();
-                        while (item != content.end()) {
-                            if ((*item)->getUse() != BGE_Object::Use::FOOD) {
-                                activeItem = (*item);
+    //If a decision has already been made, no need to think...
+    if (usePreDelay > 0) {
+        usePreDelay -= Dt;
+    }
+    else {
+        //it's time to think about this...
+        if (useTriggered) {
+            use();
+            useTriggered = false;
+        }
+        //First: look for blackListed objects
+        if (!blackList.empty()) {
+            //For each blacklisted object
+            for (std::vector<BGE_Object*>::iterator badGuy = blackList.begin();
+                    badGuy < blackList.end(); badGuy++) {
+                //If badGuy is visible
+                if (canSee(*badGuy)) {
+                    BGE_2DVect badGuyRelPos = (*badGuy)->position -position;
+                    //Behaviour depends on activeItem
+                    switch (activeItem->getUse()) {
+                        case BGE_Object::Use::FOOD : {
+                            //If activeItem is FOOD, change it
+                            std::vector<BGE_Item*>::iterator item = content.begin();
+                            while (item != content.end()) {
+                                if ((*item)->getUse() != BGE_Object::Use::FOOD) {
+                                    activeItem = (*item);
+                                    break;
+                                }
+                                item++;
+                            }
+                            if (item == content.end()) {
+                                //Do nothing if this only has food
                                 break;
                             }
-                            item++;
                         }
-                        if (item == content.end()) {
-                            //Do nothing if this only has food
+                        case BGE_Object::Use::HANDHELD_WEAPON :
+                            //if activeItem is handheld, engage close proximity combat
+                            speed.setPolar(getCreatureData().runSpeed, badGuyRelPos.angle());
                             break;
-                        }
+                        default :
+                            //shoot/throw from the distance
+                            speed.x = 0;
+                            speed.y = 0;
                     }
-                    case BGE_Object::Use::HANDHELD_WEAPON :
-                        //if activeItem is handheld, engage close proximity combat
-                        speed.setPolar(getCreatureData().runSpeed, badGuyRelPos.angle());
-                        break;
-                    default :
-                        //shoot/throw from the distance
-                        speed.x = 0;
-                        speed.y = 0;
-                }
-                target = (*badGuy)->position;
-                attack = true;
-                //No need to check for other blaklisted objs
-                break;
-            }
-        }
-    }
-    //Second: patrol checkpoints
-    else if (!checkPoints.empty()) {
-        BGE_2DVect CheckPntRelPos = *currentCheckPoint - position;
-        BGE_Object *firstCollision;
-        BGE_2DVect collPnt;
-        //if path to checkpoint is free
-        if (!segmentCollision( position, *currentCheckPoint, &firstCollision, &collPnt)) {
-            //if checkpoint reached
-            if (CheckPntRelPos.modulus() <= CP_TOLERANCE) {
-                //activate next checkpoint
-                currentCheckPoint++;
-                if (currentCheckPoint == checkPoints.end()) {
-                    currentCheckPoint = checkPoints.begin();
+                    target = (*badGuy)->position;
+                    usePreDelay = getCreatureData().responseTime;
+                    useTriggered = true;
+                    //No need to check for other blaklisted objs
+                    break;
                 }
             }
-            //Go towards checkpoint
-            speed.setPolar(getCreatureData().walkSpeed, CheckPntRelPos.angle());
         }
+        //Second: patrol checkpoints
+        else if (!checkPoints.empty()) {
+            BGE_2DVect CheckPntRelPos = *currentCheckPoint - position;
+            BGE_Object *firstCollision;
+            BGE_2DVect collPnt;
+            //if path to checkpoint is free
+            if (!segmentCollision( position, *currentCheckPoint, &firstCollision, &collPnt)) {
+                //if checkpoint reached
+                if (CheckPntRelPos.modulus() <= CP_TOLERANCE) {
+                    //activate next checkpoint
+                    currentCheckPoint++;
+                    if (currentCheckPoint == checkPoints.end()) {
+                        currentCheckPoint = checkPoints.begin();
+                    }
+                }
+                //Go towards checkpoint
+                speed.setPolar(getCreatureData().walkSpeed, CheckPntRelPos.angle());
+            }
+            else {
+                //Path to checkpoint is not free.
+            }
+        }
+        //Third: move to a random place
         else {
-            //Path to checkpoint is not free.
-        }
-    }
-    //Third: move to a random place
-    else {
-        if ((position - target).modulus() <= CP_TOLERANCE) {
-            //Target reached.
-            target.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
-            speed.setPolar(getCreatureData().walkSpeed, target.angle());
-            target += position;
-        }
-        else if (speed.x == 0 && speed.y == 0) {
-            speed.setPolar(getCreatureData().walkSpeed, (target-position).angle());
+            if ((position - target).modulus() <= CP_TOLERANCE) {
+                //Target reached.
+                target.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
+                speed.setPolar(getCreatureData().walkSpeed, target.angle());
+                target += position;
+            }
+            else if (speed.x == 0 && speed.y == 0) {
+                speed.setPolar(getCreatureData().walkSpeed, (target-position).angle());
+            }
         }
     }
     BGE_Creature::update(Dt);
-    if (attack) {
-        use();
-    }
 }
 
 void BGE_Enemy::interact(BGE_Object* other, BGE_2DVect overlap) {

@@ -326,6 +326,3 @@ std::string BGE_Creature::getName() {
     return getCreatureData().name;
 }
 
-inline BGE_Creature::CreatureData BGE_Creature::getCreatureData() {
-    return dataOfCreature[static_cast<int>(creatureType)];
-}

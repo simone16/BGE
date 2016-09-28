@@ -54,7 +54,9 @@ class BGE_Creature : public BGE_Item {
         //Weapon sprite animation counter.
         int weaponAnimCtr;
 
-        CreatureData getCreatureData();
+        inline CreatureData getCreatureData() {
+            return dataOfCreature[static_cast<int>(creatureType)];
+        }
     private:
 };
 

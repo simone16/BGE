@@ -22,6 +22,10 @@ class BGE_Enemy : public BGE_Creature {
         // Objects on this list, when seen, will trigger violent behaviour.
         std::vector<BGE_Object*> blackList;
     protected:
+        //Time to wait before use() is called (after a call has been triggered)
+        float usePreDelay;
+        bool useTriggered;
+
         //If not told otherwise, AI navigates the checkpoints.
         std::vector<BGE_2DVect> checkPoints;
         //Points to the checkpoint which is being reached.

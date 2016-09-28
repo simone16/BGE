@@ -43,7 +43,7 @@ void BGE_Enemy::update( float Dt) {
                     }
                     case BGE_Object::Use::HANDHELD_WEAPON :
                         //if activeItem is handheld, engage close proximity combat
-                        speed.setPolar(getData().runSpeed, badGuyRelPos.angle());
+                        speed.setPolar(getCreatureData().runSpeed, badGuyRelPos.angle());
                         break;
                     default :
                         //shoot/throw from the distance
@@ -73,7 +73,7 @@ void BGE_Enemy::update( float Dt) {
                 }
             }
             //Go towards checkpoint
-            speed.setPolar(getData().walkSpeed, CheckPntRelPos.angle());
+            speed.setPolar(getCreatureData().walkSpeed, CheckPntRelPos.angle());
         }
         else {
             //Path to checkpoint is not free.
@@ -84,11 +84,11 @@ void BGE_Enemy::update( float Dt) {
         if ((position - target).modulus() <= CP_TOLERANCE) {
             //Target reached.
             target.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
-            speed.setPolar(getData().walkSpeed, target.angle());
+            speed.setPolar(getCreatureData().walkSpeed, target.angle());
             target += position;
         }
         else if (speed.x == 0 && speed.y == 0) {
-            speed.setPolar(getData().walkSpeed, (target-position).angle());
+            speed.setPolar(getCreatureData().walkSpeed, (target-position).angle());
         }
     }
     BGE_Creature::update(Dt);
@@ -101,7 +101,7 @@ void BGE_Enemy::interact(BGE_Object* other, BGE_2DVect overlap) {
     BGE_Creature::interact(other, overlap);
     BGE_2DVect newTarget;
     newTarget.setPolar(engine->getNormalRandom(200, 100), engine->getRandomFloat(0,TWO_PI));
-    speed.setPolar(getData().walkSpeed, newTarget.angle());
+    speed.setPolar(getCreatureData().walkSpeed, newTarget.angle());
     target = position + newTarget;
 }
 
@@ -122,7 +122,7 @@ void BGE_Enemy::notifyHit(BGE_Object* attacker, BGE_Creature* victim) {
     else {
         //Run, you fool!
         target.setPolar(engine->getNormalRandom(300, 100), (position - attacker->position).angle());
-        speed.setPolar(getData().runSpeed, target.angle());
+        speed.setPolar(getCreatureData().runSpeed, target.angle());
         target += position;
     }
 }

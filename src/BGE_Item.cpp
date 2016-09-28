@@ -52,8 +52,7 @@ void BGE_Item::die() {
 
 void BGE_Item::setAsContent(bool content) {
     visible = !content;
-    solid = !content;
-    setCollision( !content);
+    collides = !content;
     if (content) {
         speed.x = 0;
         speed.y = 0;
@@ -75,6 +74,13 @@ void BGE_Item::remove( BGE_Item *item) {
 }
 
 void BGE_Item::render() {
+    SDL_RendererFlip flip;
+    if (angle > TWO_PI/4 && angle < TWO_PI*3/4) {
+        flip = SDL_FLIP_VERTICAL;
+    }
+    else {
+        flip = SDL_FLIP_NONE;
+    }
 #ifdef INCOMPLETE_SHEETS
     if (dataOf[type].sheet == NULL) {
         engine->itemSheetSmall.renderSprite(position.x, position.y, 0, 0, flip,  angle*DEGREE_OVER_RADIANS);
@@ -82,14 +88,4 @@ void BGE_Item::render() {
     }
 #endif // INCOMPLETE_SHEETS
     dataOf[type].sheet->renderSprite(position.x, position.y, dataOf[type].column, 0, flip,  angle*DEGREE_OVER_RADIANS);
-}
-
-void BGE_Item::setAngle(float _angle) {
-    BGE_Object::setAngle(_angle);
-    if (angle > TWO_PI/4 && angle < TWO_PI*3/4) {
-        flip = SDL_FLIP_VERTICAL;
-    }
-    else {
-        flip = SDL_FLIP_NONE;
-    }
 }

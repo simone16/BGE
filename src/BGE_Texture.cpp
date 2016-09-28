@@ -2,11 +2,9 @@
 
 #include "BGE_Engine.h"
 
-//#include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <stdio.h>
-//#include <string>
 
 BGE_Engine *BGE_Texture::engine;
 SDL_Renderer *BGE_Texture::renderer;
@@ -221,10 +219,11 @@ void BGE_Texture::render( float x, float y, SDL_RendererFlip flip, double angle,
 }
 
 void BGE_Texture::renderSprite( float x, float y, int sheetColumn, int sheetRow, SDL_RendererFlip flip, double angle, SDL_Point *center ) {
-	//DEBUG
+#ifdef DEBUG
 	if (sheetColumn >= sheetWidth/width || sheetRow >= sheetHeight/height) {
-		printf("Shit goin' on in texture rendering!!!");
+		printf("Shit goin' on in texture rendering!!!\n");
 	}
+#endif // DEBUG
 
 	//Apply viewport offset.
 	BGE_2DVect position = -(engine->getViewportOffset());

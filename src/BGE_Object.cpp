@@ -64,16 +64,12 @@ BGE_Object::BGE_Object( Type objectType, Material objMaterial ) {
 	health = getMaxHealth();
 	//Initialise interactions.
 	visible = true;
-	solid = true;
 	collides = true;
 	//Direction initialisation.
 	angle = 0;
 	//Initialise messaging.
 	messageTexture = NULL;
 	messageTimer = 0;
-	//Initialise sprite flip (facing right).
-	flip = SDL_FLIP_NONE;
-	animCtr = 15;//TODO porcodio che schifezza fai una classe per gli effetti.
 }
 
 BGE_Object::~BGE_Object() {
@@ -107,7 +103,6 @@ void BGE_Object::applyCollision(std::vector<BGE_Object*> &others) {
 	for ( int i = 0; i < others.size(); i++ ) {
 		if ( this != others[i] ) {
 			if (circularCollision(others[i])) {
-				// Checks and avoids overlapping if both objs are solid.
 				BGE_2DVect overlap;
 				if ( boxCollision(others[i], &overlap)) {
 					interact(others[i], overlap);
@@ -196,6 +191,36 @@ BGE_2DRect BGE_Object::getCollisionBox() {
 	return collisionBox;
 }
 
+bool BGE_Object::segmentCollision(BGE_2DVect start, BGE_2DVect end, BGE_Object** firstCollision, BGE_2DVect* collision) {
+	std::vector<BGE_Object *> others = engine->getCollidingObjects();
+	//List all objects which intersect the segment, adding two collision points for each.
+	std::vector<BGE_Object *> collided;
+	std::vector<BGE_2DVect> collisionPoints;
+	for (int j=0; j<others.size(); j++) {
+		BGE_2DVect a,b;
+		if (others[j] != this && others[j]->canCollide() && others[j]->getCollisionBox().intersection(start, end, a, b)) {
+			collided.push_back(others[j]);
+			collisionPoints.push_back(a);
+			collisionPoints.push_back(b);
+		}
+	}
+	//Get the nearest colliding object and the nearest point.
+	if (!collisionPoints.empty()) {
+		*collision = collisionPoints[0];
+		*firstCollision = collided[0];
+		for (int j=1; j<collisionPoints.size(); j++) {
+			if ((collisionPoints[j]-start).modulus() < (*collision - start).modulus()) {
+				*collision = collisionPoints[j];
+				*firstCollision = collided[j/2];
+			}
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 void BGE_Object::setAngle(float _angle) {
 	while (_angle > TWO_PI) {
 		_angle -= TWO_PI;
@@ -218,50 +243,54 @@ bool BGE_Object::isVisible() {
 	return visible;
 }
 
-bool BGE_Object::isSolid() {
-	return solid;
-}
-
 float BGE_Object::getHealthPercent() {
     return health/getMaxHealth()*100;
 }
 
 BGE_Object::Use BGE_Object::getUse() {
-	return dataOf[type].use;
+	return getData().use;
 }
 
 float BGE_Object::getVolume() {
-	return dataOf[type].depth * dataOf[type].height * dataOf[type].width;
+	return getData().depth * getData().height * getData().width;
 }
 
 float BGE_Object::getDepth() {
-    return dataOf[static_cast<int>(type)].depth;
+    return getData().depth;
 }
 
 float BGE_Object::getMass() {
-    return getVolume() * dataOfMaterial[static_cast<int>(material)].density;
+    return getVolume() * getMaterialData().density;
 }
 
 float BGE_Object::getNutrition() {
-	return getMass() * dataOfMaterial[static_cast<int>(material)].nutrition;
+	return getMass() * getMaterialData().nutrition;
 }
 
 SDL_Color BGE_Object::getColor() {
-    return dataOfMaterial[static_cast<int>(material)].color;
+    return getMaterialData().color;
 }
 
 float BGE_Object::getMaxHealth() {
-    return dataOf[static_cast<int>(type)].baseHealth*dataOfMaterial[static_cast<int>(material)].strenght;
+    return getData().baseHealth*getMaterialData().strenght;
 }
 
 BGE_Object::PhysicalState BGE_Object::getPhysicalState() {
-	return dataOfMaterial[static_cast<int>(material)].state;
+	return getMaterialData().state;
 }
 
 float BGE_Object::getReloadTime() {
-    return dataOf[static_cast<int>(type)].reloadTime;   //SIGSEGV segmentation fault. this == NULL
+    return getData().reloadTime;
 }
 
 std::string BGE_Object::getName() {
-    return dataOf[type].name + " of " + dataOfMaterial[static_cast<int>(material)].name;
+    return getData().name + " of " + getMaterialData().name;
+}
+
+inline BGE_Object::TypeData BGE_Object::getData() {
+    return dataOf[static_cast<int>(type)];
+}
+
+inline BGE_Object::MaterialData BGE_Object::getMaterialData() {
+    return dataOfMaterial[static_cast<int>(material)];
 }

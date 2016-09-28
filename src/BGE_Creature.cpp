@@ -32,6 +32,8 @@ BGE_Creature::~BGE_Creature() {}
 
 void BGE_Creature::render() {
 	BGE_Object::render();
+
+	SDL_RendererFlip flip;
     uint8_t bodyQuadrant = (target-position).quadrant();
     //Determine whether creature is moving horizontally.
 	bool horizontal = false;
@@ -169,7 +171,7 @@ void BGE_Creature::use() {
 	if (activeItem != NULL && useDelay <= 0) {
 		useDelay = activeItem->getReloadTime();	//In some cases activeItem is NULL at the end of use().
 		//Avoid surgical precision when using items
-		float useAngle = angle + engine->getNormalRandom(0,getData().aimAccuracy);
+		float useAngle = angle + engine->getNormalRandom(0,getCreatureData().aimAccuracy);
 		switch (activeItem->getUse()) {
 			case BGE_Object::Use::WEAPON: {
 				//Throw it.
@@ -313,47 +315,17 @@ float BGE_Creature::getUseDelayPercent() {
 }
 
 float BGE_Creature::getMaxHealth() {
-	return dataOfCreature[static_cast<int>(creatureType)].health;
+	return getCreatureData().health;
 }
 
 float BGE_Creature::getViewField() {
-	return getData().viewField;
+	return getCreatureData().viewField;
 }
 
 std::string BGE_Creature::getName() {
-    return dataOfCreature[static_cast<int>(creatureType)].name;
+    return getCreatureData().name;
 }
 
-bool BGE_Creature::segmentCollision(BGE_2DVect start, BGE_2DVect end, BGE_Object** firstCollision, BGE_2DVect* collision) {
-	std::vector<BGE_Object *> others = engine->getCollidingObjects();
-	//List all objects which intersect the segment, adding two collision points for each.
-	std::vector<BGE_Object *> collided;
-	std::vector<BGE_2DVect> collisionPoints;
-	for (int j=0; j<others.size(); j++) {
-		BGE_2DVect a,b;
-		if (others[j] != this && others[j]->canCollide() && others[j]->getCollisionBox().intersection(start, end, a, b)) {
-			collided.push_back(others[j]);
-			collisionPoints.push_back(a);
-			collisionPoints.push_back(b);
-		}
-	}
-	//Get the nearest colliding object and the nearest point.
-	if (!collisionPoints.empty()) {
-		*collision = collisionPoints[0];
-		*firstCollision = collided[0];
-		for (int j=1; j<collisionPoints.size(); j++) {
-			if ((collisionPoints[j]-start).modulus() < (*collision - start).modulus()) {
-				*collision = collisionPoints[j];
-				*firstCollision = collided[j/2];
-			}
-		}
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-BGE_Object::CreatureData BGE_Creature::getData() {
+inline BGE_Creature::CreatureData BGE_Creature::getCreatureData() {
     return dataOfCreature[static_cast<int>(creatureType)];
 }

@@ -22,7 +22,7 @@ class BGE_Enemy : public BGE_Creature {
         // Objects on this list, when seen, will trigger violent behaviour.
         std::vector<BGE_Object*> blackList;
     protected:
-        //If not told otherwise, AI navigates the checkpoints (avoiding obstacles).
+        //If not told otherwise, AI navigates the checkpoints.
         std::vector<BGE_2DVect> checkPoints;
         //Points to the checkpoint which is being reached.
         std::vector<BGE_2DVect>::iterator currentCheckPoint;

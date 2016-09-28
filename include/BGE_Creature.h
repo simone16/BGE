@@ -47,14 +47,14 @@ class BGE_Creature : public BGE_Item {
     protected:
         //Points to a contained item.
         BGE_Item *activeItem;
-        //Weapon sprite animation counter.
-        int weaponAnimCtr;
         //Time remaining before use() can be called again [S].
         float useDelay;
+        //Main sprite animation counter.
+        int animCtr;
+        //Weapon sprite animation counter.
+        int weaponAnimCtr;
 
-        //Detects the first object on a sigle segment path.
-        bool segmentCollision(BGE_2DVect start, BGE_2DVect end, BGE_Object **firstCollision, BGE_2DVect *collision);
-        CreatureData getData();
+        CreatureData getCreatureData();
     private:
 };
 

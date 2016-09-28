@@ -158,15 +158,6 @@ bool BGE_Engine::load() {
 		tileSheet.setSpriteSize( 25, 50);
 		tileSheet.setSpriteOffset(0, -12);
 	}
-	filename = "img/splinters.png";
-	if( !splintersSheet.loadFromFile( filename) ) {
-		printf( "Failed to load %s!\n", filename.c_str());
-		success = false;
-	}
-	else {
-		splintersSheet.setSpriteSize( 25, 25);
-		splintersSheet.setSpriteOffset(0, -12);
-	}
 	filename = "img/hats.png";
 	if( !hatsSheet.loadFromFile( filename) ) {
 		printf( "Failed to load %s!\n", filename.c_str());
@@ -674,10 +665,12 @@ void BGE_Engine::close() {
 
 	//Free loaded images
 	stickmanSheet.free();
-	itemSheetSmall.free();
-	splintersSheet.free();
-	hatsSheet.free();
-	textTest.free();
+    itemSheetSmall.free();
+    itemSheetTall.free();
+    tileSheet.free();
+    hatsSheet.free();
+    textFrame.free();
+    particlesSheet.free();
 
 	//Free fonts
 	TTF_CloseFont( defaultFont );

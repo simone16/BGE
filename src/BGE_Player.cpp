@@ -64,19 +64,19 @@ void BGE_Player::handleEvent( SDL_Event &e ) {
 		//Adjust the speed
 		switch( e.key.keysym.sym ) {
 			case SDLK_w:
-				speed.y -= getData().walkSpeed;
+				speed.y -= getCreatureData().walkSpeed;
 				break;
 
 			case SDLK_s:
-				speed.y += getData().walkSpeed;
+				speed.y += getCreatureData().walkSpeed;
 				break;
 
 			case SDLK_a:
-				speed.x -= getData().walkSpeed;
+				speed.x -= getCreatureData().walkSpeed;
 				break;
 
 			case SDLK_d:
-				speed.x += getData().walkSpeed;
+				speed.x += getCreatureData().walkSpeed;
 				break;
 		}
 	}
@@ -85,19 +85,19 @@ void BGE_Player::handleEvent( SDL_Event &e ) {
 		//Adjust the velocity
 		switch( e.key.keysym.sym ) {
 			case SDLK_w:
-				speed.y += getData().walkSpeed;
+				speed.y += getCreatureData().walkSpeed;
 				break;
 
 			case SDLK_s:
-				speed.y -= getData().walkSpeed;
+				speed.y -= getCreatureData().walkSpeed;
 				break;
 
 			case SDLK_a:
-				speed.x += getData().walkSpeed;
+				speed.x += getCreatureData().walkSpeed;
 				break;
 
 			case SDLK_d:
-				speed.x -= getData().walkSpeed;
+				speed.x -= getCreatureData().walkSpeed;
 				break;
 		}
 	}
@@ -113,42 +113,42 @@ void BGE_Player::handleEventJoy( SDL_Event &e ) {
 
 					case SDL_HAT_DOWN:
 						speed.x = 0;
-						speed.y = getData().walkSpeed;
+						speed.y = getCreatureData().walkSpeed;
 						break;
 
 					case SDL_HAT_LEFT:
-						speed.x = -getData().walkSpeed;
+						speed.x = -getCreatureData().walkSpeed;
 						speed.y = 0;
 						break;
 
 					case SDL_HAT_LEFTDOWN:
-						speed.x = -getData().walkSpeed;
-						speed.y = getData().walkSpeed;
+						speed.x = -getCreatureData().walkSpeed;
+						speed.y = getCreatureData().walkSpeed;
 						break;
 
 					case SDL_HAT_LEFTUP:
-						speed.x = -getData().walkSpeed;
-						speed.y = -getData().walkSpeed;
+						speed.x = -getCreatureData().walkSpeed;
+						speed.y = -getCreatureData().walkSpeed;
 						break;
 
 					case SDL_HAT_RIGHT:
-						speed.x = getData().walkSpeed;
+						speed.x = getCreatureData().walkSpeed;
 						speed.y = 0;
 						break;
 
 					case SDL_HAT_RIGHTDOWN:
-						speed.x = getData().walkSpeed;
-						speed.y = getData().walkSpeed;
+						speed.x = getCreatureData().walkSpeed;
+						speed.y = getCreatureData().walkSpeed;
 						break;
 
 					case SDL_HAT_RIGHTUP:
-						speed.x = getData().walkSpeed;
-						speed.y = -getData().walkSpeed;
+						speed.x = getCreatureData().walkSpeed;
+						speed.y = -getCreatureData().walkSpeed;
 						break;
 
 					case SDL_HAT_UP:
 						speed.x = 0;
-						speed.y = -getData().walkSpeed;
+						speed.y = -getCreatureData().walkSpeed;
 						break;
 				}
 		}

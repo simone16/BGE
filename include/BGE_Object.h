@@ -138,6 +138,8 @@ class BGE_Object {
 		//Applying correction to this position eliminates overlapping.
 		bool boxCollision( BGE_Object *other, BGE_2DVect *correction=NULL);
 		BGE_2DRect getCollisionBox();
+		//Detects the first object on a segment (except this).
+        bool segmentCollision(BGE_2DVect start, BGE_2DVect end, BGE_Object **firstCollision, BGE_2DVect *collision);
 
 		//Takes an argument in radians.
 		void setAngle(float angle);
@@ -168,23 +170,21 @@ class BGE_Object {
 	protected:
 		//The object is rendered if...
 		bool visible;
-		//The object allows overlapping if not...
-		bool solid;
 		//Detect collision with other objects if both...
 		bool collides;
 		//Direction of the object along x axis [radians].
 		float angle;
+		//Current health of the object
 		float health;
 
-        //sprite flipping direction [none, horizontal, vertical].
-		SDL_RendererFlip flip;
-		//Sprite animation counter.
-		int animCtr;    //TODO remove
 		//Current Message texture.
 		BGE_Texture *messageTexture;
 		//Time to display the message [S].
 		float messageTimer;
 
+		//Inline functions to access raw data
+		TypeData getData();
+		MaterialData getMaterialData();
 		//Data relative to object type.
 		static TypeData dataOf[];
 		//Data relative to object material.

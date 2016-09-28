@@ -13,6 +13,7 @@
 #include <BGE_Object.h>
 #include <BGE_2DRect.h>
 #include <BGE_2DVect.h>
+#include <flags.h>
 
 #include <random>
 
@@ -79,7 +80,6 @@ class BGE_Engine {
 		void playWeapon();
 
 		//Game textures
-		BGE_Texture splintersSheet;
 		BGE_Texture stickmanSheet;
 		BGE_Texture itemSheetSmall;
 		BGE_Texture itemSheetTall;

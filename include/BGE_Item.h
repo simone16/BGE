@@ -25,8 +25,6 @@ class BGE_Item : public BGE_Moveable {
         virtual void remove( BGE_Item *item);
 
         virtual void render();
-
-        virtual void setAngle(float angle);
     protected:
 
         //Objects contained/owned by this.

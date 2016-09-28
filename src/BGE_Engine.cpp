@@ -215,18 +215,77 @@ bool BGE_Engine::load() {
 	}
 
 	//Load sound fx
-	ouchFx = Mix_LoadWAV( "snd/ouch.wav" );
-
-	if ( ouchFx == NULL ) {
-		printf( "Failed to load ouch sfx\n" );
+    Mix_Chunk *chunk = Mix_LoadWAV( "snd/argh.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx\n" );
 		success = false;
 	}
-
-	muoioFx = Mix_LoadWAV( "snd/muoio.wav" );
-
-	if ( ouchFx == NULL ) {
-		printf( "Failed to load ouch sfx\n" );
+	else {
+        creatureHitFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/ouch.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx1\n" );
 		success = false;
+	}
+	else {
+        weaponFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/pam.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx2\n" );
+		success = false;
+	}
+	else {
+        weaponFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/pim.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx3\n" );
+		success = false;
+	}
+	else {
+        weaponFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/pum.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx4\n" );
+		success = false;
+	}
+	else {
+        weaponFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/puum.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx5\n" );
+		success = false;
+	}
+	else {
+        weaponFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/paam.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx6\n" );
+		success = false;
+	}
+	else {
+        weaponFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/ptish.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx7\n" );
+		success = false;
+	}
+	else {
+        itemFxs.push_back(chunk);
+	}
+	chunk = Mix_LoadWAV( "snd/crash.wav" );
+    if ( chunk == NULL ) {
+		printf( "Failed to load sfx8\n" );
+		success = false;
+	}
+	else {
+        itemFxs.push_back(chunk);
 	}
 
 	//Load level.
@@ -625,10 +684,19 @@ void BGE_Engine::close() {
 	defaultFont = NULL;
 
 	//Free loaded sound fx
-	Mix_FreeChunk( ouchFx );
-	Mix_FreeChunk( muoioFx );
-	ouchFx = NULL;
-	muoioFx = NULL;
+	for (int i=0; i<creatureHitFxs.size(); i++) {
+        Mix_FreeChunk( creatureHitFxs[i]);
+	}
+	creatureHitFxs.clear();
+	for (int i=0; i<itemFxs.size(); i++) {
+        Mix_FreeChunk( itemFxs[i]);
+	}
+	itemFxs.clear();
+	for (int i=0; i<weaponFxs.size(); i++) {
+        Mix_FreeChunk( weaponFxs[i]);
+	}
+	weaponFxs.clear();
+
 
 	//Unload joystick
 	SDL_JoystickClose( joystick );
@@ -730,6 +798,21 @@ void BGE_Engine::updateVectors() {
         printf("Failed to eliminate: %s\n", toRemove[i]->getName().c_str());
     }
     toRemove.clear();
+}
+
+void BGE_Engine::playCreature() {
+    int rnd = getRandomInt(0, creatureHitFxs.size()-1);
+    Mix_PlayChannel(-1, creatureHitFxs[rnd], 0);
+}
+
+void BGE_Engine::playItem() {
+    int rnd = getRandomInt(0, itemFxs.size()-1);
+    Mix_PlayChannel(-1, itemFxs[rnd], 0);
+}
+
+void BGE_Engine::playWeapon() {
+    int rnd = getRandomInt(0, weaponFxs.size()-1);
+    Mix_PlayChannel(-1, weaponFxs[rnd], 0);
 }
 
 int BGE_Engine::getRandomInt(int min, int max) {

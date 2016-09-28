@@ -73,6 +73,11 @@ class BGE_Engine {
 		float getRandomFloat(float min, float max);
 		float getNormalRandom(float mean, float stddev);
 
+		//TODO organise better
+		void playCreature();
+		void playItem();
+		void playWeapon();
+
 		//Game textures
 		BGE_Texture splintersSheet;
 		BGE_Texture stickmanSheet;
@@ -93,7 +98,10 @@ class BGE_Engine {
 		BGE_2DVect viewportOffset;
 
 		BGE_Texture textTest;
-		Mix_Chunk *ouchFx, *muoioFx;
+		//Game snd efx
+		std::vector<Mix_Chunk *> creatureHitFxs;
+		std::vector<Mix_Chunk *> itemFxs;
+		std::vector<Mix_Chunk *> weaponFxs;
 
 		//Player in the current level.
 		BGE_Player * player;

@@ -39,6 +39,7 @@ void BGE_Item::hit(BGE_Object* origin, float energy) {
 }
 
 void BGE_Item::die() {
+    engine->playItem();
     for (int i=0; i<content.size(); i++) {
         content[i]->position = position;
         content[i]->speed.setPolar(engine->getNormalRandom(100, 50), engine->getRandomFloat(0, TWO_PI));

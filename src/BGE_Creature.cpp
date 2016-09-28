@@ -150,6 +150,8 @@ void BGE_Creature::interact(BGE_Object *other, BGE_2DVect overlap) {
 }
 
 void BGE_Creature::hit(BGE_Object *origin, float energy) {
+	//Play sound fx
+	engine->playCreature();
 	//Affect health
 	BGE_Object::hit( origin, energy);
 	//Scream in pain
@@ -202,6 +204,7 @@ void BGE_Creature::use() {
 						//Check if has any bullets.
 						for (int i=0; i<content.size(); i++) {
 							if (content[i]->type == BGE_Object::BULLETS) {
+								engine->playWeapon();
 								BGE_2DVect bulletEnd;
 								bulletEnd.setPolar(3000, useAngle);
 								bulletEnd += position;

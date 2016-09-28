@@ -33,7 +33,7 @@ void BGE_Object::init() {
     dataOf[KNIFE] =     {"Knife",Use::HANDHELD_WEAPON,0.5      ,2000            ,10,10,10               ,&(engine->itemSheetSmall),3};
     dataOf[STONE] =     {"Stone",Use::WEAPON       ,0.5        ,6000            ,10,10,10               ,&(engine->itemSheetSmall),4};
     dataOf[SWORD] =     {"Sword",Use::HANDHELD_WEAPON,0.5      ,3000            ,10,25,10               ,&(engine->itemSheetTall) ,0};
-    dataOf[VIS_EFFECT] ={"Splinters",Use::NONE     ,0          ,100             ,0,0,0                  ,&(engine->itemSheetSmall),0};
+    dataOf[PARTICLE] =  {"Splinters",Use::NONE     ,0          ,1               ,5,5,5                  ,&(engine->itemSheetSmall),0};
     dataOf[TABLE] =     {"Table",Use::NONE         ,0.1        ,5000            ,25,25,25               ,NULL,0};
     dataOf[TILE] =      {"Tile",Use::NONE          ,0.1        ,100000          ,25,25,25               ,NULL,0};
 
@@ -139,14 +139,6 @@ void BGE_Object::die() {
 }
 
 void BGE_Object::render() {
-    //TODO: create a class fo visual effects.
-    if (type == VIS_EFFECT) {
-        engine->splintersSheet.renderSprite( position.x, position.y, static_cast<int>(material), 3-animCtr/4);
-        animCtr--;
-        if (animCtr < 0) {
-            engine->remove(this);
-        }
-    }
     if (messageTexture != NULL) {
         messageTexture->render(position.x, position.y-getDepth());
     }

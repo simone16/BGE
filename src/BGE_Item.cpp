@@ -9,100 +9,24 @@
 
 #include <flags.h>
 
-const float BGE_Item::DRAG = 0.5;
-const float BGE_Item::STOP_THRESHOLD = 10;  // [px/S]
-
 BGE_Item::BGE_Item( Type objectType, Material objMaterial):
-    BGE_Object(objectType, objMaterial) {
-    //Speed is initialised to 0,0.
-    //Initialise movement locking.
-    lock = MovementLock::NONE;
+    BGE_Moveable(objectType, objMaterial) {
 }
 
 BGE_Item::~BGE_Item() {}
 
 void BGE_Item::update(float Dt) {
-    position += speed*Dt;
-    speed = speed*(1-Dt*DRAG);
-    if (speed.modulus() < STOP_THRESHOLD) {
-		speed.x = 0;
-		speed.y = 0;
-    }
-    //Reset lock before interact() is called:
-    lock = MovementLock::NONE;
+    BGE_Moveable::update( Dt);
 }
 
 void BGE_Item::interact(BGE_Object* other, BGE_2DVect overlap) {
     //If other is a tile...
     if (other->type == BGE_Object::TILE) {
-        //Correct position.
-        position += overlap;
-        //Invert speed along collision axis and set lock.
-        if (std::abs(overlap.x) > std::abs(overlap.y)) {
-            speed.x = - speed.x;
-            if (lock == MovementLock::VERTICAL) {
-                lock = MovementLock::BOTH;
-            }
-            else {
-                lock = MovementLock::HORIZONTAL;
-            }
-        }
-        else {
-            speed.y = - speed.y;
-            if (lock == MovementLock::HORIZONTAL) {
-                lock = MovementLock::BOTH;
-            }
-            else {
-                lock = MovementLock::VERTICAL;
-            }
-        }
+        BGE_Moveable::wallBounce(other, overlap);
     }
-    //Other is not a tile.
+    //Other is not a tile (then we assume it is Moveable child, god help us).
     else {
-        BGE_Item *otherMover = static_cast<BGE_Item *>(other);
-        if (otherMover->lock == MovementLock::HORIZONTAL && std::abs(overlap.x) > std::abs(overlap.y)) {
-            //Correct position.
-            position += overlap;
-            speed.x = - speed.x;
-            if (lock == MovementLock::VERTICAL) {
-                lock = MovementLock::BOTH;
-            }
-            else {
-                lock = MovementLock::HORIZONTAL;
-            }
-        }
-        else if (otherMover->lock == MovementLock::VERTICAL && std::abs(overlap.x) < std::abs(overlap.y)) {
-            //Correct position.
-            position += overlap;
-            speed.y = - speed.y;
-            if (lock == MovementLock::HORIZONTAL) {
-                lock = MovementLock::BOTH;
-            }
-            else {
-                lock = MovementLock::VERTICAL;
-            }
-        }
-        else {
-            //Correct both position 50%.
-            position += overlap*0.5;
-            otherMover->position -= overlap*0.5;
-            //Elastic collision.
-            //1 is this, 2 is other.
-            float m1 = getMass();
-            float m2 = otherMover->getMass();
-            if (std::abs(overlap.x) > std::abs(overlap.y)) {
-                float v1 = speed.x;
-                float v2 = otherMover->speed.x;
-                speed.x = ((m1-m2)*v1+2*m2*v2)/(m1+m2);
-                otherMover->speed.x = ((m2-m1)*v2+2*m1*v1)/(m1+m2);
-            }
-            else {
-                float v1 = speed.y;
-                float v2 = otherMover->speed.y;
-                speed.y = ((m1-m2)*v1+2*m2*v2)/(m1+m2);
-                otherMover->speed.y = ((m2-m1)*v2+2*m1*v1)/(m1+m2);
-            }
-        }
+        BGE_Moveable::elasticBounce(other, overlap);
     }
 }
 

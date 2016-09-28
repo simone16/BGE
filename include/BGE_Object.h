@@ -33,7 +33,7 @@ class BGE_Object {
             KNIFE,
             STONE,
             SWORD,
-            VIS_EFFECT,
+            PARTICLE,
             TABLE,
             TILE,
             TOT
@@ -119,7 +119,7 @@ class BGE_Object {
 		virtual void hit( BGE_Object* origin, float energy);
 		//Handles collisions.
 		//Note it has to be symmetrical (called once for every two objects, see engine.start()).
-		virtual void applyCollision( std::vector<BGE_Object *> &others );
+		void applyCollision( std::vector<BGE_Object *> &others );
 		//Interact( other) is called whenever this touches other.
 		virtual void interact( BGE_Object * other, BGE_2DVect overlapping) {};
 		//Displays a message on top of the object.
@@ -178,7 +178,7 @@ class BGE_Object {
         //sprite flipping direction [none, horizontal, vertical].
 		SDL_RendererFlip flip;
 		//Sprite animation counter.
-		int animCtr;
+		int animCtr;    //TODO remove
 		//Current Message texture.
 		BGE_Texture *messageTexture;
 		//Time to display the message [S].

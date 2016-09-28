@@ -473,6 +473,9 @@ void BGE_Engine::start() {
             (*i)->applyCollision( remainingItems );
             (*i)->applyCollision( tiles );
 		}
+		for ( int i = 0; i < effects.size(); i++ ) {
+			effects[i]->applyCollision( tiles );
+		}
 
 		//Adjust viewport.
 		BGE_2DRect freeMove = getFreeMoveArea();
@@ -669,7 +672,7 @@ void BGE_Engine::updateVectors() {
 		if (toAdd[i]->type == BGE_Object::TILE) {
             tiles.push_back(toAdd[i]);
 		}
-		else if (toAdd[i]->type == BGE_Object::VIS_EFFECT) {
+		else if (toAdd[i]->type == BGE_Object::PARTICLE) {
 			effects.push_back(toAdd[i]);
 		}
 		else if (toAdd[i]->type == BGE_Object::CREATURE) {

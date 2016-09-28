@@ -2,24 +2,13 @@
 #define BGE_ITEM_H
 
 #include <BGE_Object.h>
+#include <BGE_Moveable.h>
 #include <BGE_2DVect.h>
 
-class BGE_Item : public BGE_Object {
+class BGE_Item : public BGE_Moveable {
     public:
-        //The fraction of speed loss 0<DRAG<1 [1/s].
-        static const float DRAG;
-        //Speed bottom limit to speed=0 [px/s].
-        static const float STOP_THRESHOLD;
-
         BGE_Item(Type objectType, Material objMaterial);
         virtual ~BGE_Item();
-
-        enum class MovementLock: uint8_t {
-                HORIZONTAL,
-                VERTICAL,
-                BOTH,
-                NONE
-        };
 
         //Called at every computational step.
         virtual void update(float Dt);
@@ -38,10 +27,6 @@ class BGE_Item : public BGE_Object {
         virtual void render();
 
         virtual void setAngle(float angle);
-
-        //Current speed.
-        BGE_2DVect speed;
-        MovementLock lock;
     protected:
 
         //Objects contained/owned by this.

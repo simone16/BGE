@@ -2,6 +2,7 @@
 
 #include "BGE_Engine.h"
 #include <BGE_Enemy.h>
+#include <BGE_Particle.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -186,7 +187,7 @@ void BGE_Creature::use() {
 				BGE_Object *collisionObj = NULL;
 				if (segmentCollision(position, range, &collisionObj, &collisionPoint)) {
 					collisionObj->hit(this, 2000);
-					BGE_Object *splinters = new BGE_Object( VIS_EFFECT, collisionObj->material);
+					BGE_Particle *splinters = new BGE_Particle(collisionObj->material );
 					splinters->position = collisionPoint;
 					engine->add(splinters);
 				}
@@ -206,13 +207,14 @@ void BGE_Creature::use() {
 								BGE_Object *collisionObj = NULL;
 								if (segmentCollision(position, bulletEnd, &collisionObj, &collisionPoint)) {
 									collisionObj->hit(this, 2000);
-									BGE_Object *splinters = new BGE_Object( VIS_EFFECT, collisionObj->material);
+									BGE_Particle *splinters = new BGE_Particle(collisionObj->material);
 									splinters->position = collisionPoint;
 									engine->add(splinters);
 								}
-								BGE_Object *splinters = new BGE_Object( VIS_EFFECT, Material::IRON);
+								BGE_Particle *splinters = new BGE_Particle(Material::IRON);
 								splinters->position.setPolar(30, angle);
 								splinters->position += position;
+								splinters->speed.setPolar(300, angle);
 								engine->add(splinters);
 								weaponAnimCtr = 5*WALK_FRAME_REPEAT;
 								break;

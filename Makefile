@@ -19,7 +19,7 @@ LFLAGS =
 LIBS = -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
 
 # define the C++ source files
-SRCS = src/BGE_2DRect.cpp src/BGE_Enemy.cpp src/BGE_Object.cpp src/BGE_Tile.cpp src/BGE_2DVect.cpp   src/BGE_Engine.cpp src/BGE_Player.cpp src/BGE_Timer.cpp src/BGE_Creature.cpp src/BGE_Item.cpp src/BGE_Texture.cpp src/BGE_Moveable.cpp src/main.cpp
+SRCS = src/BGE_2DRect.cpp src/BGE_Enemy.cpp src/BGE_Object.cpp src/BGE_Tile.cpp src/BGE_2DVect.cpp   src/BGE_Engine.cpp src/BGE_Player.cpp src/BGE_Timer.cpp src/BGE_Creature.cpp src/BGE_Item.cpp src/BGE_Texture.cpp src/BGE_Moveable.cpp src/BGE_Particle.cpp src/main.cpp
 SRCDIR = src/
 
 # define the C++ object files 

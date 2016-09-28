@@ -30,5 +30,7 @@ void BGE_Particle::interact(BGE_Object* other, BGE_2DVect overlap) {
 }
 
 void BGE_Particle::render() {
-    engine->splintersSheet.renderSprite( position.x, position.y, static_cast<int>(material), 1);
+    SDL_Color color = getColor();
+    engine->particlesSheet.setColor( color.r, color.g, color.b);
+    engine->particlesSheet.renderSprite( position.x, position.y, 0, 0);
 }

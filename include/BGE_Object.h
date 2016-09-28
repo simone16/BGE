@@ -84,6 +84,7 @@ class BGE_Object {
 		//Used to hold the values associated with each material.
         struct MaterialData {
             std::string name;
+            SDL_Color color;     // for procedural generation of sprites
             PhysicalState state;
             float density;       // [kg/px3]
             float nutrition;     // [HP/kg] negative -> toxic.
@@ -153,10 +154,10 @@ class BGE_Object {
 		float getDepth();
 		float getMass();
 		float getNutrition();
+		SDL_Color getColor();
 		virtual float getMaxHealth();
 		PhysicalState getPhysicalState();
 		float getReloadTime();
-		bool canMove();
 		virtual std::string getName();
 
 		//Position of the object (center) [px].

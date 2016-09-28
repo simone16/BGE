@@ -20,8 +20,7 @@ class BGE_Moveable : public BGE_Object {
     //The following are meant to be used by child classes in their interact() functions
     //and define different type of interactions.
     void wallBounce(BGE_Object* other, BGE_2DVect overlap);
-    //WARNING: don't call elasticBounce unless sure that *other is child of BGE_Moveable!
-    void elasticBounce(BGE_Object* other, BGE_2DVect overlap);
+    void elasticBounce(BGE_Moveable* other, BGE_2DVect overlap);
     void stick(BGE_Object* other, BGE_2DVect overlap);
   private:
 };

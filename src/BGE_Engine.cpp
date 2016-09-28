@@ -181,6 +181,15 @@ bool BGE_Engine::load() {
 		printf( "Failed to load %s!\n", filename.c_str());;
 		success = false;
 	}
+	filename = "img/particles.png";
+	if( !particlesSheet.loadFromFile( filename) ) {
+		printf( "Failed to load %s!\n", filename.c_str());;
+		success = false;
+	}
+	else {
+		particlesSheet.setSpriteSize( 20, 20);
+		particlesSheet.setSpriteOffset(0, -12);
+	}
 
 	//Load text
 	std::ifstream inputListFile ( "list" );

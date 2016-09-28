@@ -32,7 +32,7 @@ void BGE_Moveable::wallBounce(BGE_Object* other, BGE_2DVect overlap) {
     }
 }
 
-void BGE_Moveable::elasticBounce(BGE_Object* other, BGE_2DVect overlap) {
+void BGE_Moveable::elasticBounce(BGE_Moveable* other, BGE_2DVect overlap) {
     //Correct both positions 50%.
     position += overlap*0.5;
     other->position -= overlap*0.5;
@@ -40,19 +40,17 @@ void BGE_Moveable::elasticBounce(BGE_Object* other, BGE_2DVect overlap) {
     //1 is this, 2 is other.
     float m1 = getMass();
     float m2 = other->getMass();
-    //Note you can't elasticBounce two objects if one of them is not moveable.
-    BGE_Moveable *otherMov = static_cast<BGE_Moveable*>(other);
     if (std::abs(overlap.x) > std::abs(overlap.y)) {
         float v1 = speed.x;
-        float v2 = otherMov->speed.x;
+        float v2 = other->speed.x;
         speed.x = ((m1-m2)*v1+2*m2*v2)/(m1+m2);
-        otherMov->speed.x = ((m2-m1)*v2+2*m1*v1)/(m1+m2);
+        other->speed.x = ((m2-m1)*v2+2*m1*v1)/(m1+m2);
     }
     else {
         float v1 = speed.y;
-        float v2 = otherMov->speed.y;
+        float v2 = other->speed.y;
         speed.y = ((m1-m2)*v1+2*m2*v2)/(m1+m2);
-        otherMov->speed.y = ((m2-m1)*v2+2*m1*v1)/(m1+m2);
+        other->speed.y = ((m2-m1)*v2+2*m1*v1)/(m1+m2);
     }
 }
 

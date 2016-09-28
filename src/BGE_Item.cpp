@@ -26,7 +26,8 @@ void BGE_Item::interact(BGE_Object* other, BGE_2DVect overlap) {
     }
     //Other is not a tile (then we assume it is Moveable child, god help us).
     else {
-        BGE_Moveable::elasticBounce(other, overlap);
+        BGE_Moveable *otherMov = static_cast<BGE_Moveable*>(other);
+        BGE_Moveable::elasticBounce(otherMov, overlap);
     }
 }
 

@@ -220,7 +220,7 @@ bool BGE_Engine::load() {
 		success = false;
 	}
 	else {
-        weaponFxs.push_back(chunk);
+        creatureHitFxs.push_back(chunk);
 	}
 	chunk = Mix_LoadWAV( "snd/pam.wav" );
     if ( chunk == NULL ) {

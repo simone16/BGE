@@ -150,12 +150,11 @@ bool BGE_Engine::load() {
 		itemSheetTall.setSpriteOffset(0, -12);
 	}
 	filename = "img/tiles.png";
-	if( !tileSheet.loadFromFile( filename) ) {
+	if( !tileSheet.loadTiles() ) {
 		printf( "Failed to load %s!\n", filename.c_str());
 		success = false;
 	}
 	else {
-		tileSheet.setSpriteSize( 25, 50);
 		tileSheet.setSpriteOffset(0, -12);
 	}
 	filename = "img/hats.png";

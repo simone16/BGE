@@ -9,6 +9,14 @@
 
 const float BGE_Tile::SIDE = 25.0;
 
+int BGE_Tile::getMaskIndex(int matIndex) {
+    return dataOfMaterial[matIndex].tileMaskIndex;
+}
+
+SDL_Color BGE_Tile::getTileColor(int matIndex) {
+    return dataOfMaterial[matIndex].color;
+}
+
 BGE_Tile::BGE_Tile( Material tileMaterial):
     BGE_Object(BGE_Object::TILE, tileMaterial) {
 }
@@ -16,7 +24,5 @@ BGE_Tile::BGE_Tile( Material tileMaterial):
 BGE_Tile::~BGE_Tile() {}
 
 void BGE_Tile::render() {
-    SDL_Color color = getColor();
-    engine->tileSheet.setColor(color.r, color.g, color.b);
-    engine->tileSheet.renderSprite(position.x, position.y, getMaterialData().tileMaskIndex, 0);
+    engine->tileSheet.renderSprite(position.x, position.y, static_cast<int>(material), 0);
 }

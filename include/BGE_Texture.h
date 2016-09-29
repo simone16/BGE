@@ -32,6 +32,8 @@ class BGE_Texture {
 		bool loadFromRenderedText( std::string textureText, Uint8 red, Uint8 green, Uint8 blue );
 		//Creates image from text using the global font
 		bool loadFromRenderedTextOnFrame( std::string textureText, Uint8 red, Uint8 green, Uint8 blue);
+		//Loads procedural sprites for tiles (every material).
+		bool loadTiles();
 		//Deallocates texture
 		void free();
 

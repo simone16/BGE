@@ -38,15 +38,15 @@ void BGE_Object::init() {
     dataOf[TILE] =      {"Tile",Use::NONE          ,0.1        ,100000          ,25,25,25               ,NULL,0};
 
     //                  		                            name        color           tile_index  state                       density 		    nutrition   strenght
-    dataOfMaterial[static_cast<int>(Material::FLESH)] =     {"meat"     ,{250,30,30}   ,3       ,PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX   ,1.0    ,0.5};
-    dataOfMaterial[static_cast<int>(Material::BONE)] =      {"bone"     ,{255,255,255} ,3       ,PhysicalState::HARD_SOLID   ,0.7*LITERS_PER_CUBIC_PX   ,0.1    ,1.0};
-    dataOfMaterial[static_cast<int>(Material::IRON)] =      {"iron"     ,{247,240,12}  ,2       ,PhysicalState::HARD_SOLID   ,7.9*LITERS_PER_CUBIC_PX   ,-0.5   ,3.0};
-    dataOfMaterial[static_cast<int>(Material::PINEWOOD)] =  {"pine wood",{228,172,68}  ,0       ,PhysicalState::HARD_SOLID   ,0.5*LITERS_PER_CUBIC_PX   ,-0.1   ,2.0};
-    dataOfMaterial[static_cast<int>(Material::MARBLE)] =    {"marble"   ,{208,208,208} ,1       ,PhysicalState::HARD_SOLID   ,2.7*LITERS_PER_CUBIC_PX   ,-1.0   ,3.0};
-    dataOfMaterial[static_cast<int>(Material::FIBERGLASS)] ={"fiberglass",{71,152,17}  ,3       ,PhysicalState::HARD_SOLID   ,2.0*LITERS_PER_CUBIC_PX   ,-2.0   ,2.0};
-    dataOfMaterial[static_cast<int>(Material::DRUG)] =      {"drugs"    ,{0,0,0}       ,3       ,PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX   ,0.0    ,0.3};
-    dataOfMaterial[static_cast<int>(Material::WATER)] =     {"water"    ,{41,225,242}  ,1       ,PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX   ,0.5    ,0.1};
-    dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric"   ,{100,100,150} ,3       ,PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX   ,0.1    ,0.5};
+    dataOfMaterial[static_cast<int>(Material::FLESH)] =     {"meat"     ,{250,30,30}   ,0       ,PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX   ,1.0    ,0.5};
+    dataOfMaterial[static_cast<int>(Material::BONE)] =      {"bone"     ,{255,255,255} ,0       ,PhysicalState::HARD_SOLID   ,0.7*LITERS_PER_CUBIC_PX   ,0.1    ,1.0};
+    dataOfMaterial[static_cast<int>(Material::IRON)] =      {"iron"     ,{247,240,12}  ,3       ,PhysicalState::HARD_SOLID   ,7.9*LITERS_PER_CUBIC_PX   ,-0.5   ,3.0};
+    dataOfMaterial[static_cast<int>(Material::PINEWOOD)] =  {"pine wood",{228,172,68}  ,2       ,PhysicalState::HARD_SOLID   ,0.5*LITERS_PER_CUBIC_PX   ,-0.1   ,2.0};
+    dataOfMaterial[static_cast<int>(Material::MARBLE)] =    {"marble"   ,{208,208,208} ,3       ,PhysicalState::HARD_SOLID   ,2.7*LITERS_PER_CUBIC_PX   ,-1.0   ,3.0};
+    dataOfMaterial[static_cast<int>(Material::FIBERGLASS)] ={"fiberglass",{71,152,17}  ,1       ,PhysicalState::HARD_SOLID   ,2.0*LITERS_PER_CUBIC_PX   ,-2.0   ,2.0};
+    dataOfMaterial[static_cast<int>(Material::DRUG)] =      {"drugs"    ,{50,50,50}    ,1       ,PhysicalState::SOFT_SOLID   ,1.0*LITERS_PER_CUBIC_PX   ,0.0    ,0.3};
+    dataOfMaterial[static_cast<int>(Material::WATER)] =     {"water"    ,{41,225,242}  ,3       ,PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX   ,0.5    ,0.1};
+    dataOfMaterial[static_cast<int>(Material::FABRIC)] =    {"fabric"   ,{100,100,150} ,1       ,PhysicalState::SOFT_SOLID   ,0.2*LITERS_PER_CUBIC_PX   ,0.1    ,0.5};
     dataOfMaterial[static_cast<int>(Material::GOLD)] =      {"gold"     ,{240,213,43}  ,3       ,PhysicalState::HARD_SOLID   ,19.3*LITERS_PER_CUBIC_PX  ,0.0    ,1.0};
 
     //                                                          name            health  viewFld aimAcc       respTime   runSp   walkSp   sprite_index

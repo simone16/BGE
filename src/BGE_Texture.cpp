@@ -1,6 +1,7 @@
 #include "BGE_Texture.h"
 
 #include "BGE_Engine.h"
+#include <BGE_Tile.h>
 
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -184,6 +185,81 @@ bool BGE_Texture::loadFromRenderedTextOnFrame(std::string textureText, Uint8 red
 
     //Free allocated memory
     SDL_FreeSurface( textSurface);
+    SDL_FreeSurface( finalSurface);
+
+	return true;
+}
+
+bool BGE_Texture::loadTiles() {
+	int totMat = static_cast<int>(BGE_Object::Material::TOT);
+
+	//Calculate size of the final surface
+	width = BGE_Tile::SIDE;
+	height = 2*width;
+	sheetWidth = width*totMat;
+	sheetHeight = height;
+
+	//Create final surface
+	Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+#endif
+	SDL_Surface *finalSurface = SDL_CreateRGBSurface(0, sheetWidth, sheetHeight, 32, rmask, gmask, bmask, amask);
+	if (finalSurface == NULL) {
+		printf( "SDL Error: %s\n", SDL_GetError() );
+		return false;
+	}
+
+	//Load masks surface
+    SDL_Surface *masks = IMG_Load("img/tiles.png");
+    if (masks == NULL) {
+		printf( "SDL_IMG Error: %s\n", IMG_GetError() );
+		return false;
+    }
+    SDL_SetSurfaceBlendMode(masks, SDL_BLENDMODE_NONE);
+
+    //Generate sprites
+    SDL_Rect source = {0,0,width,height};
+    SDL_Rect dest = {0,0,width,height};
+    for (int mat=0; mat<totMat; mat++) {
+		SDL_Color color = BGE_Tile::getTileColor(mat);
+        source.x = width*BGE_Tile::getMaskIndex(mat);
+        dest.x = width*mat;
+        printf("mask index: %i, color: %i,%i,%i\n", BGE_Tile::getMaskIndex(mat), color.r, color.g, color.b);
+        if (BGE_Tile::getMaskIndex(mat) == 3) {
+            source.x = 0;
+            SDL_SetSurfaceColorMod(masks, color.r,color.g,color.b);
+            SDL_BlitSurface(masks, &source, finalSurface, &dest);
+            source.x = 3*width;
+            SDL_SetSurfaceBlendMode(masks, SDL_BLENDMODE_BLEND);
+            SDL_SetSurfaceColorMod(masks, 50,50,50);
+            SDL_BlitSurface(masks, &source, finalSurface, &dest);
+            SDL_SetSurfaceBlendMode(masks, SDL_BLENDMODE_NONE);
+        }
+        else {
+			SDL_SetSurfaceColorMod(masks, color.r,color.g,color.b);
+			SDL_BlitSurface(masks, &source, finalSurface, &dest);
+        }
+    }
+
+    //Create texture
+    texture = SDL_CreateTextureFromSurface( renderer, finalSurface);
+    //texture = SDL_CreateTextureFromSurface( renderer, masks);
+    if (texture == NULL) {
+		printf("SDL Error: %s\n", SDL_GetError());
+		return false;
+    }
+
+    //Free allocated memory
+    SDL_FreeSurface( masks);
     SDL_FreeSurface( finalSurface);
 
 	return true;

@@ -88,4 +88,5 @@ void BGE_Item::render() {
     }
 #endif // INCOMPLETE_SHEETS
     dataOf[type].sheet->renderSprite(position.x, position.y, dataOf[type].column, 0, flip,  angle*DEGREE_OVER_RADIANS);
+    BGE_Object::render();
 }

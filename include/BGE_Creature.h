@@ -13,7 +13,7 @@ class BGE_Creature : public BGE_Item {
         static const float THROW_ENERGY;
         //-----------------------------------------the above will (hopefully) dep. on stats.
         //Number of walking frames & repetition.
-        static const int WALK_FRAMES = 12;
+        static const int WALK_FRAMES = 13;
         static const int WALK_FRAME_REPEAT = 3;
 
         BGE_Creature( CreatureType crtType );

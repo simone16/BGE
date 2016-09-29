@@ -21,6 +21,8 @@ class BGE_Texture {
 		static BGE_Engine *engine;
 		static SDL_Renderer *renderer;
 
+		static SDL_Surface *textFrame;
+
 		BGE_Texture();
 		~BGE_Texture();
 

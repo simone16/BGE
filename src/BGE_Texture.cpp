@@ -6,8 +6,10 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 
-BGE_Engine *BGE_Texture::engine;
-SDL_Renderer *BGE_Texture::renderer;
+BGE_Engine *BGE_Texture::engine = NULL;
+SDL_Renderer *BGE_Texture::renderer = NULL;
+
+SDL_Surface *BGE_Texture::textFrame = NULL;
 
 BGE_Texture::BGE_Texture() {
 	//Initialize
@@ -121,65 +123,70 @@ bool BGE_Texture::loadFromRenderedTextOnFrame(std::string textureText, Uint8 red
 	//Get rid of preexisting texture
 	free();
 
-	//Render text surface
+	//Generate text surface
 	SDL_Color textColor = {red, green, blue};
 	SDL_Color background = {255, 255, 255};
 	SDL_Surface *textSurface = TTF_RenderText_Shaded( engine->getFont(), textureText.c_str(), textColor, background);
-
-	if( textSurface != NULL ) {
-		//Create texture from surface pixels
-		SDL_Texture *textTexture;
-		textTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
-
-		if( textTexture == NULL ) {
-			printf( "Unable to create texture from rendered text \"%s\"!\nSDL Error: %s\n", textureText.c_str(), SDL_GetError() );
-		}
-		else {
-			//Initialise to empty texture.
-			texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, (textSurface->w/10)*10+30, 20);
-			//Render on texture.
-            SDL_SetRenderTarget(renderer, texture);
-            SDL_SetRenderDrawColor( renderer, 255, 255, 255, 0);
-			SDL_RenderClear( renderer );
-			//Render left side.
-            SDL_Rect source = {0,0, 10, 20};
-            SDL_Rect dest = {0,0, 10, 20};
-            SDL_RenderCopy(renderer, engine->textFrame.texture, &source, &dest);
-            //Render body.
-            source.x = 10;
-            while (dest.x < textSurface->w) {
-				dest.x += 10;
-				SDL_RenderCopy(renderer, engine->textFrame.texture, &source, &dest);
-            }
-            //Render right side.
-            source.x = 20;
-            dest.x += 10;
-            SDL_RenderCopy(renderer, engine->textFrame.texture, &source, &dest);
-            //Set texture size.
-            sheetWidth = dest.x +10;
-            sheetHeight = 20;
-            width = sheetWidth;
-            height = sheetHeight;
-            //Render text on top.
-            dest.x = (dest.x+10 - textSurface->w)/2;
-            dest.y = (20 - textSurface->h)/2;
-            dest.w = textSurface->w;
-			dest.h = textSurface->h;
-			SDL_RenderCopy(renderer, textTexture, NULL, &dest);
-			//Restore renderer.
-			SDL_SetRenderTarget(renderer, NULL);
-		}
-
-		//Get rid of old surface and texture.
-		SDL_FreeSurface( textSurface );
-        SDL_DestroyTexture( textTexture);
-	}
-	else {
-		printf( "Unable to create texture from text \"%s\"!\nSDL Error: %s\n", textureText.c_str(), TTF_GetError() );
+	if (textSurface == NULL) {
+		printf( "SDL_TTF Error: %s\n", TTF_GetError() );
+		return false;
 	}
 
-	//Return success
-	return texture != NULL;
+	//Calculate size of the final surface
+	sheetWidth = (textSurface->w/(textFrame->w/3)+2)*(textFrame->w/3);
+	sheetHeight = textFrame->h;
+	width = sheetWidth;
+	height = sheetHeight;
+
+	//Create final surface
+	Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+#endif
+	SDL_Surface *finalSurface = SDL_CreateRGBSurface(0, sheetWidth, sheetHeight, 32, rmask, gmask, bmask, amask);
+	if (finalSurface == NULL) {
+		printf( "SDL Error: %s\n", SDL_GetError() );
+		return false;
+	}
+
+	//Blit frame on final surface
+    SDL_Rect source = {0,0,textFrame->w/3,textFrame->h};
+    SDL_Rect dest = {0,0,textFrame->w/3,textFrame->h};
+    SDL_BlitSurface(textFrame, &source, finalSurface, &dest);
+    source.x += textFrame->w/3;
+    dest.x += textFrame->w/3;
+    while (dest.x < width - textFrame->w/3) {
+		SDL_BlitSurface(textFrame, &source, finalSurface, &dest);
+		dest.x += textFrame->w/3;
+    }
+	source.x += textFrame->w/3;
+	SDL_BlitSurface(textFrame, &source, finalSurface, &dest);
+
+	//Blit text on final surface
+	dest.x = (sheetWidth-textSurface->w)/2;
+	dest.y = (sheetHeight-textSurface->h)/2;
+    SDL_BlitSurface(textSurface, NULL, finalSurface, &dest);
+
+    //Create texture
+    texture = SDL_CreateTextureFromSurface( renderer, finalSurface);
+    if (texture == NULL) {
+		printf("SDL Error: %s\n", SDL_GetError());
+		return false;
+    }
+
+    //Free allocated memory
+    SDL_FreeSurface( textSurface);
+    SDL_FreeSurface( finalSurface);
+
+	return true;
 }
 
 void BGE_Texture::free() {
@@ -221,7 +228,7 @@ void BGE_Texture::render( float x, float y, SDL_RendererFlip flip, double angle,
 void BGE_Texture::renderSprite( float x, float y, int sheetColumn, int sheetRow, SDL_RendererFlip flip, double angle, SDL_Point *center ) {
 #ifdef DEBUG
 	if (sheetColumn >= sheetWidth/width || sheetRow >= sheetHeight/height) {
-		printf("Shit goin' on in texture rendering!!!\n");
+		printf("Shit goin' on in texture rendering:\n%i, %i\n", sheetColumn, sheetRow);
 	}
 #endif // DEBUG
 

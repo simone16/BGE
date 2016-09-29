@@ -85,7 +85,6 @@ class BGE_Engine {
 		BGE_Texture itemSheetTall;
 		BGE_Texture tileSheet;
 		BGE_Texture hatsSheet;
-		BGE_Texture textFrame;
 		BGE_Texture particlesSheet;
 	protected:
 	private:

@@ -23,6 +23,7 @@ BGE_Creature::BGE_Creature( CreatureType crtType):
 	//No active item at first.
 	activeItem = NULL;
 	//Initialise animation counters.
+	animCtr = 0;
 	weaponAnimCtr = 0;
 	//Ready to shoot.
 	useDelay = 0;
@@ -31,17 +32,16 @@ BGE_Creature::BGE_Creature( CreatureType crtType):
 BGE_Creature::~BGE_Creature() {}
 
 void BGE_Creature::render() {
-	BGE_Object::render();
-
 	SDL_RendererFlip flip;
     uint8_t bodyQuadrant = (target-position).quadrant();
+
     //Determine whether creature is moving horizontally.
 	bool horizontal = false;
     if (bodyQuadrant == 0 || bodyQuadrant == 2) {
 		horizontal = true;
     }
 
-	//Flip hor. when facing left.
+	//Flip hor. if facing left.
 	if (bodyQuadrant == 2) {
 		flip = SDL_FLIP_HORIZONTAL;
 	}
@@ -49,26 +49,33 @@ void BGE_Creature::render() {
 		flip = SDL_FLIP_NONE;
 	}
 
-	//Use clip 0 if not moving, else advance ctr.
-	Uint8 column;
+	//Use clip 0 if not moving
+	int column =0;
 	if (speed.modulus() == 0) {
-		column = 0;
 		animCtr = 0;
 	}
+	//Otherwise advance animCtr
 	else {
 		animCtr++;
-		if (animCtr > WALK_FRAMES*WALK_FRAME_REPEAT) {
-			animCtr = WALK_FRAME_REPEAT;
+		if (animCtr >= WALK_FRAMES*WALK_FRAME_REPEAT) {
+			animCtr = 0;
 		}
+
 		//If moving backwards invert animation.
 		uint8_t speedQuadrant = speed.quadrant();
 		if (std::abs(speedQuadrant-bodyQuadrant) == 2) {
-			column = WALK_FRAMES - animCtr/WALK_FRAME_REPEAT;
+			column = WALK_FRAMES-1 - animCtr/WALK_FRAME_REPEAT;
 		}
 		else {
 			column = animCtr/WALK_FRAME_REPEAT;
 		}
 	}
+#ifdef DEBUG
+	if (column >= WALK_FRAMES) {
+		printf("ERROR: %s has column=%i\n", getName().c_str(), column);
+		column = 0;
+	}
+#endif // DEBUG
 
 	//Render body.
     engine->stickmanSheet.renderSprite(position.x, position.y, column, horizontal?1:0, flip);
@@ -114,6 +121,10 @@ void BGE_Creature::render() {
 	}
 	//Render hat.
 	engine->hatsSheet.renderSprite(position.x, position.y, column, dataOfCreature[static_cast<int>(creatureType)].spriteIndex, flip);
+	//BGE_Object::render();
+	if (messageTexture != NULL) {
+        messageTexture->render(position.x, position.y-getDepth());
+    }
 }
 
 void BGE_Creature::update(float Dt) {

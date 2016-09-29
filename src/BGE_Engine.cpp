@@ -168,7 +168,8 @@ bool BGE_Engine::load() {
 		hatsSheet.setSpriteOffset(0, -30);
 	}
 	filename = "img/textFrame.png";
-	if( !textFrame.loadFromFile( filename) ) {
+	BGE_Texture::textFrame = IMG_Load(filename.c_str());
+	if( BGE_Texture::textFrame == NULL ) {
 		printf( "Failed to load %s!\n", filename.c_str());;
 		success = false;
 	}
@@ -669,7 +670,6 @@ void BGE_Engine::close() {
     itemSheetTall.free();
     tileSheet.free();
     hatsSheet.free();
-    textFrame.free();
     particlesSheet.free();
 
 	//Free fonts

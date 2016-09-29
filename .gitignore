@@ -1,5 +1,7 @@
 SDL_BGE.cbp
 SDL_BGE.depend
 SDL_BGE.layout
+BGE
+*.o
 obj/**
 bin/**

@@ -145,7 +145,10 @@ void BGE_Creature::interact(BGE_Object *other, BGE_2DVect overlap) {
 	}
     else if (other->getVolume() <= POCKETS_VOLUME) {
 		//Put in inventory.
-        add(static_cast<BGE_Item*>(other));
+        BGE_Item *newItem = static_cast<BGE_Item*>(other);
+        if (!newItem->selfDestruct) {
+			add(newItem);
+		}
         printf("%s added to inventory!\n", other->getName().c_str());
     }
     else if (other->getMass() <= MOVE_WEIGHT_THRESHOLD) {
@@ -191,19 +194,24 @@ void BGE_Creature::use() {
 				activeItem->position += position;
 				//Set object speed according to throw strenght.
 				activeItem->speed.setPolar( std::sqrt(2*THROW_ENERGY/activeItem->getMass()), useAngle);
+				//Activate countdown for bombs
+				if (activeItem->type == GRENADE) {
+                    activeItem->selfDestruct = true;
+				}
 				remove(activeItem);
 				break;
 			}
 			case BGE_Object::Use::HANDHELD_WEAPON: {
+				float damage = activeItem->getDamage();
 				BGE_2DVect range;
 				range.setPolar(activeItem->getCollisionRadius()*2+getCollisionRadius(), useAngle);
 				range += position;
 				BGE_2DVect collisionPoint;
 				BGE_Object *collisionObj = NULL;
 				if (segmentCollision(position, range, &collisionObj, &collisionPoint)) {
-					collisionObj->hit(this, 2000);
+					collisionObj->hit(this, damage);
 					BGE_Particle::explosion( collisionPoint,
-											2000,
+											damage,
 											collisionObj->material,
 											angle,
 											TWO_PI*0.5);
@@ -211,41 +219,43 @@ void BGE_Creature::use() {
 				weaponAnimCtr = 5*WALK_FRAME_REPEAT;
 				break;
 			}
-			case BGE_Object::Use::SHOOTING_WEAPON:
-				switch (activeItem->type) {
-					case BGE_Object::GUN:
-						//Check if has any bullets.
-						for (int i=0; i<content.size(); i++) {
-							if (content[i]->type == BGE_Object::BULLETS) {
-								engine->playWeapon();
-								BGE_2DVect bulletEnd;
-								bulletEnd.setPolar(3000, useAngle);
-								bulletEnd += position;
-								BGE_2DVect collisionPoint;
-								BGE_Object *collisionObj = NULL;
-								if (segmentCollision(position, bulletEnd, &collisionObj, &collisionPoint)) {
-									collisionObj->hit(this, 2000);
-									BGE_Particle::explosion(collisionPoint,
-															2000,
-															collisionObj->material,
-															angle+TWO_PI/2,
-															TWO_PI*0.3);
-								}
-								BGE_2DVect gunPos;
-								gunPos.setPolar(33, angle);
-								gunPos += position;
-								BGE_Particle::explosion(gunPos,
-														1500,
-														Material::IRON,
-														angle,
-														TWO_PI*0.1);
-								weaponAnimCtr = 5*WALK_FRAME_REPEAT;
-								break;
-							}
+			case BGE_Object::Use::SHOOTING_WEAPON: {
+				//Check if has any bullets.
+				for (int i=0; i<content.size(); i++) {
+					if (content[i]->type == BGE_Object::BULLETS) {
+						float damage = content[i]->getDamage();
+						printf("damage: %f\n", damage);
+						engine->playWeapon();
+						//Set trajectory and find  first collision.
+						BGE_2DVect bulletEnd;
+						bulletEnd.setPolar(3000, useAngle);	//TODO range from object data.
+						bulletEnd += position;
+						BGE_2DVect collisionPoint;
+						BGE_Object *collisionObj = NULL;
+						if (segmentCollision(position, bulletEnd, &collisionObj, &collisionPoint)) {
+							collisionObj->hit(this, damage);
+							BGE_Particle::explosion(collisionPoint,
+													damage,
+													collisionObj->material,
+													angle+TWO_PI/2,
+													TWO_PI*0.3);
 						}
+						//Show some sparks.
+						BGE_2DVect gunPos;
+						gunPos.setPolar(33, angle);
+						gunPos += position;
+						BGE_Particle::explosion(gunPos,
+												damage*1.5,
+												Material::IRON,
+												angle,
+												TWO_PI*0.1);
+						//Show recoil.
+						weaponAnimCtr = activeItem->getReloadTime()*60;
 						break;
+					}
 				}
 				break;
+			}
 			case BGE_Object::Use::FOOD: {
 				health += activeItem->getNutrition();
 				printf("Current HP: %f\n", health);
@@ -299,11 +309,7 @@ void BGE_Creature::remove( BGE_Item *item) {
 bool BGE_Creature::canSee(BGE_Object* target) {
 	//Check target is within view field
 	if ((position - target->position).modulus() <= getViewField()) {
-		BGE_Object *firstCollision;
-		BGE_2DVect collPnt;
-		segmentCollision(position, target->position, &firstCollision, &collPnt);
-		//If the first obstruction is the target, vision is possible.
-		return firstCollision == target;
+		return isFirstCollision(target);
 	}
 	else {
 		return false;

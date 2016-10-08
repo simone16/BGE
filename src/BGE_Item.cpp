@@ -1,7 +1,8 @@
 #include "BGE_Item.h"
 
 #include <BGE_Texture.h>
-#include "BGE_Engine.h"
+#include <BGE_Engine.h>
+#include <BGE_Particle.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -11,11 +12,18 @@
 
 BGE_Item::BGE_Item( Type objectType, Material objMaterial):
     BGE_Moveable(objectType, objMaterial) {
+    selfDestruct = false;
 }
 
 BGE_Item::~BGE_Item() {}
 
 void BGE_Item::update(float Dt) {
+    if (selfDestruct) {
+        health -= Dt*getData().selfDestructTimeConv;
+        if (health <= 0) {
+            die();
+        }
+    }
     BGE_Moveable::update( Dt);
 }
 
@@ -46,9 +54,20 @@ void BGE_Item::die() {
         content[i]->setAsContent(false);
     }
     content.clear();
+    if ( type == GRENADE) {
+        float damage = getData().baseDamage;
+        BGE_Particle::explosion(position, damage, Material::IRON, 0.0, TWO_PI);
+        std::vector<BGE_Object *> targets = engine->getMoveableObjects();
+        for (int i=0; i<targets.size(); i++) {
+            float distance = (targets[i]->position - position).modulus();
+            //don't do anything if the resulting damage is < 100;
+            if (targets[i] != this && targets[i]->canCollide() && distance < damage/100 && isFirstCollision(targets[i])) {
+                targets[i]->hit(this, damage/(distance+0.5));
+            }
+        }
+    }
     BGE_Object::die();
 }
-
 
 void BGE_Item::setAsContent(bool content) {
     visible = !content;
@@ -89,4 +108,19 @@ void BGE_Item::render() {
 #endif // INCOMPLETE_SHEETS
     dataOf[type].sheet->renderSprite(position.x, position.y, dataOf[type].column, 0, flip,  angle*DEGREE_OVER_RADIANS);
     BGE_Object::render();
+}
+
+float BGE_Item::getDamage() {
+    if (type == BULLETS) {
+        return getData().baseDamage * getMass();
+    }
+    else if (getData().use == Use::HANDHELD_WEAPON) {
+        return getData().baseDamage * getMaterialData().strenght;
+    }
+    else {
+#ifdef DEBUG
+        printf("Warning, use of undefined damage for %s!\n", getName().c_str());
+#endif // DEBUG
+        return 0;
+    }
 }

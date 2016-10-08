@@ -426,6 +426,12 @@ bool BGE_Engine::load() {
     cont = new BGE_Item(BGE_Object::BULLETS, BGE_Object::Material::MARBLE);
     items.push_back(cont);
     item->add(cont);
+    cont = new BGE_Item(BGE_Object::UZI, BGE_Object::Material::IRON);
+    items.push_back(cont);
+    item->add(cont);
+    cont = new BGE_Item(BGE_Object::GRENADE, BGE_Object::Material::IRON);
+    items.push_back(cont);
+    item->add(cont);
 
 //    //Load some enemies.
 //    for (int i=0; i<5; i++) {
@@ -733,6 +739,13 @@ std::vector<BGE_Object *> BGE_Engine::getCollidingObjects() {
 	colliders.insert(colliders.end(), tiles.begin(), tiles.end());
 	colliders.push_back(player);
 	return colliders;
+}
+
+std::vector<BGE_Object *> BGE_Engine::getMoveableObjects() {
+    std::vector<BGE_Object *> moveable = creatures;
+    moveable.insert(moveable.end(), items.begin(), items.end());
+    moveable.push_back(player);
+    return moveable;
 }
 
 void BGE_Engine::add(BGE_Object *object) {

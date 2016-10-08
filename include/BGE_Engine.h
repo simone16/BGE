@@ -62,6 +62,8 @@ class BGE_Engine {
 		std::vector<BGE_Enemy *> getAICreatures();
 		//Returns a list of loaded collideable objects.
         std::vector<BGE_Object *> getCollidingObjects();
+        //Returns a list of objects implementing Moveable.
+        std::vector<BGE_Object *> getMoveableObjects();
         //Add an object to the current level.
         void add(BGE_Object * object);
         //Removes an object from the current level.

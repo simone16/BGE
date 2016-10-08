@@ -21,21 +21,23 @@ BGE_Object::MaterialData BGE_Object::dataOfMaterial[static_cast<int>(BGE_Object:
 BGE_Object::CreatureData BGE_Object::dataOfCreature[static_cast<int>(BGE_Object::CreatureType::TOT)];
 
 void BGE_Object::init() {
-    //                  Name        Use            reload_time  base_health    Z_Depth, Width, Height   sprite sheet and column
-    dataOf[BARREL] =    {"Barrel",Use::NONE        ,0.1        ,5000            ,30,25,25               ,&(engine->itemSheetTall),2};
-    dataOf[BLOCK] =     {"Block",Use::NONE         ,0.1        ,1100            ,25,25,25               ,NULL,0};
-    dataOf[BOTTLE] =    {"Bottle",Use::WEAPON      ,0.2        ,100             ,20,10,10               ,&(engine->itemSheetTall),3};
-    dataOf[BULLETS] =   {"Bullets",Use::NONE       ,0.1        ,2000            ,10,10,10               ,&(engine->itemSheetSmall),1};
-    dataOf[CHAIR] =     {"Chair",Use::NONE         ,0.1        ,5000            ,50,25,25               ,NULL,0};
-    dataOf[GUN] =       {"Gun",Use::SHOOTING_WEAPON,0.5        ,2000            ,20,15,10               ,&(engine->itemSheetSmall),2};
-    dataOf[CREATURE] =  {"Creature",Use::FOOD      ,1.0        ,0               ,50,25,25               ,NULL,0};
-    dataOf[MOUSE] =     {"Mouse",Use::FOOD         ,1.0        ,500             ,10,10,10               ,NULL,0};
-    dataOf[KNIFE] =     {"Knife",Use::HANDHELD_WEAPON,0.5      ,2000            ,10,10,10               ,&(engine->itemSheetSmall),3};
-    dataOf[STONE] =     {"Stone",Use::WEAPON       ,0.5        ,6000            ,10,10,10               ,&(engine->itemSheetSmall),4};
-    dataOf[SWORD] =     {"Sword",Use::HANDHELD_WEAPON,0.5      ,3000            ,10,25,10               ,&(engine->itemSheetTall) ,0};
-    dataOf[PARTICLE] =  {"Splinters",Use::NONE     ,0          ,1               ,5,5,5                  ,&(engine->particlesSheet),0};
-    dataOf[TABLE] =     {"Table",Use::NONE         ,0.1        ,5000            ,25,25,25               ,NULL,0};
-    dataOf[TILE] =      {"Tile",Use::NONE          ,0.1        ,100000          ,25,25,25               ,NULL,0};
+    //                  Name        Use            reload_time  base_health baseDamage  HP->S   Z_Depth, Width, Height   sprite sheet and column
+    dataOf[BARREL] =    {"Barrel",Use::NONE        ,0.1        ,5000        ,0          ,500     ,30,25,25               ,&(engine->itemSheetTall),2};
+    dataOf[BLOCK] =     {"Block",Use::NONE         ,0.1        ,1100        ,0          ,500     ,25,25,25               ,NULL,0};
+    dataOf[BOTTLE] =    {"Bottle",Use::WEAPON      ,0.2        ,100         ,0          ,500     ,20,10,10               ,&(engine->itemSheetTall),3};
+    dataOf[BULLETS] =   {"Bullets",Use::NONE       ,0.1        ,2000        ,2000       ,500     ,10,10,10               ,&(engine->itemSheetSmall),1};
+    dataOf[CHAIR] =     {"Chair",Use::NONE         ,0.1        ,5000        ,0          ,500     ,50,25,25               ,NULL,0};
+    dataOf[GUN] =       {"Gun",Use::SHOOTING_WEAPON,0.5        ,2000        ,1          ,500     , 5,15,10               ,&(engine->itemSheetSmall),2};
+    dataOf[UZI] =       {"Uzi",Use::SHOOTING_WEAPON,0.05       ,2000        ,1          ,500     , 5,25,20               ,&(engine->itemSheetSmall),5};
+    dataOf[CREATURE] =  {"Creature",Use::FOOD      ,1.0        ,0           ,0          ,500     ,50,25,25               ,NULL,0};
+    dataOf[MOUSE] =     {"Mouse",Use::FOOD         ,1.0        ,500         ,0          ,500     ,10,10,10               ,NULL,0};
+    dataOf[KNIFE] =     {"Knife",Use::HANDHELD_WEAPON,0.5      ,2000        ,1000       ,500     ,10,10,10               ,&(engine->itemSheetSmall),3};
+    dataOf[STONE] =     {"Stone",Use::WEAPON       ,0.5        ,6000        ,0          ,500     ,10,10,10               ,&(engine->itemSheetSmall),4};
+    dataOf[GRENADE] =   {"Bomb",Use::WEAPON        ,1          ,1000        ,30000      ,500     ,10,10,10               ,&(engine->itemSheetSmall),6};
+    dataOf[SWORD] =     {"Sword",Use::HANDHELD_WEAPON,0.5      ,3000        ,2000       ,500     ,10,25,10               ,&(engine->itemSheetTall) ,0};
+    dataOf[PARTICLE] =  {"Splinters",Use::NONE     ,0          ,1           ,0          ,1       ,5,5,5                  ,&(engine->particlesSheet),0};
+    dataOf[TABLE] =     {"Table",Use::NONE         ,0.1        ,5000        ,0          ,500     ,25,25,25               ,NULL,0};
+    dataOf[TILE] =      {"Tile",Use::NONE          ,0.1        ,100000      ,0          ,500     ,25,25,25               ,NULL,0};
 
     //                  		                            name        color           tile_index  state                       density 		    nutrition   strenght
     dataOfMaterial[static_cast<int>(Material::FLESH)] =     {"meat"     ,{250,30,30}   ,0       ,PhysicalState::LIQUID       ,1.0*LITERS_PER_CUBIC_PX   ,1.0    ,0.5};

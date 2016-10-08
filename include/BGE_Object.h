@@ -36,6 +36,8 @@ class BGE_Object {
             PARTICLE,
             TABLE,
             TILE,
+            GRENADE,
+            UZI,
             TOT
         };
         //Use determines what Player::use does
@@ -52,6 +54,8 @@ class BGE_Object {
             Use use;        //player.use() action.
             float reloadTime;//min delay between use() calls [S].
             float baseHealth;//starting health [HP].
+            float baseDamage;//hit damage when used [HP].
+            float selfDestructTimeConv;//converts time in HP [HP/S].
             float depth;    //z axis, used for volume [px].
             float width;    //used for collision [px]
             float height;   //used for collision [px]
@@ -118,7 +122,9 @@ class BGE_Object {
 		BGE_Object( Type objectType, Material objMaterial);
 		virtual ~BGE_Object();
 
+		//To be called at each game cycle
 		virtual void update(float Dt);
+		//hit
 		virtual void hit( BGE_Object* origin, float energy);
 		//Handles collisions.
 		//Note it has to be symmetrical (called once for every two objects, see engine.start()).
@@ -142,6 +148,13 @@ class BGE_Object {
 		BGE_2DRect getCollisionBox();
 		//Detects the first object on a segment (except this).
         bool segmentCollision(BGE_2DVect start, BGE_2DVect end, BGE_Object **firstCollision, BGE_2DVect *collision);
+        //Tell whether other is firstCollision of segmentCollision.
+        inline bool isFirstCollision(BGE_Object *target) {
+            BGE_Object *collObj;
+            BGE_2DVect collPos;
+            segmentCollision(position, target->position, &collObj, &collPos);
+            return collObj == target;
+        }
 
 		//Takes an argument in radians.
 		void setAngle(float angle);

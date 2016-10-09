@@ -34,7 +34,7 @@ void BGE_Object::init() {
     dataOf[STONE] =     {"Stone",Use::WEAPON       ,0.5        ,6000        ,0          ,500     ,10,10,10               ,&(engine->itemSheetSmall),4};
     dataOf[GRENADE] =   {"Bomb",Use::WEAPON        ,1          ,1000        ,30000      ,500     ,10,10,10               ,&(engine->itemSheetSmall),6};
     dataOf[SWORD] =     {"Sword",Use::HANDHELD_WEAPON,0.5      ,3000        ,2000       ,500     ,10,25,10               ,&(engine->itemSheetTall) ,0};
-    dataOf[PARTICLE] =  {"Splinters",Use::NONE     ,0          ,1           ,0          ,1       ,5,5,5                  ,&(engine->particlesSheet),0};
+    dataOf[PARTICLE] =  {"Splinters",Use::NONE     ,0          ,1           ,0          ,500     ,5,5,5                  ,&(engine->particlesSheet),0};
     dataOf[TABLE] =     {"Table",Use::NONE         ,0.1        ,5000        ,0          ,500     ,25,25,25               ,NULL,0};
     dataOf[TILE] =      {"Tile",Use::NONE          ,0.1        ,100000      ,0          ,500     ,25,25,25               ,NULL,0};
 

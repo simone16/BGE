@@ -24,7 +24,7 @@ void BGE_Particle::explosion(BGE_2DVect position, float energy, Material mat, fl
         for (int i=0; i<particleCount; i++) {
             BGE_Particle *particle = new BGE_Particle(mat);
             particle->position = position;
-            particle->health = engine->getNormalRandom(energy/4000, energy/5000);
+            particle->health = engine->getNormalRandom(energy*0.1, energy);
             particle->speed.setPolar( engine->getNormalRandom( meanSpeed, 0.4*meanSpeed),
                                     engine->getRandomFloat(0, TWO_PI));
             engine->add(particle);
@@ -34,7 +34,7 @@ void BGE_Particle::explosion(BGE_2DVect position, float energy, Material mat, fl
         for (int i=0; i<particleCount; i++) {
             BGE_Particle *particle = new BGE_Particle(mat);
             particle->position = position;
-            particle->health = engine->getNormalRandom(energy/4000, energy/5000);
+            particle->health = engine->getNormalRandom(energy*0.1, energy);
             particle->speed.setPolar( engine->getNormalRandom( meanSpeed, 0.4*meanSpeed),
                                     engine->getNormalRandom( direction, width));
             engine->add(particle);
@@ -43,7 +43,7 @@ void BGE_Particle::explosion(BGE_2DVect position, float energy, Material mat, fl
 }
 
 void BGE_Particle::update(float Dt) {
-    health -= Dt;
+    health -= Dt*getData().selfDestructTimeConv;
     if (health <= 0) {
         die();
     }

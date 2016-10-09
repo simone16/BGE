@@ -179,6 +179,8 @@ class BGE_Object {
 
 		//Position of the object (center) [px].
 		BGE_2DVect position;
+		//Current health of the object
+		float health;
 		//Properties of this object.
 		Type type;
 		Material material;
@@ -189,8 +191,6 @@ class BGE_Object {
 		bool collides;
 		//Direction of the object along x axis [radians].
 		float angle;
-		//Current health of the object
-		float health;
 
 		//Current Message texture.
 		BGE_Texture *messageTexture;

@@ -11,7 +11,7 @@ class BGE_Moveable : public BGE_Object {
 	BGE_Moveable(Type objectType, Material objMaterial);
 	virtual ~BGE_Moveable();
 
-	//Updates position and speed.
+	//Updates position and speed, does not call BGE_Object::update()!
 	virtual void update(float Dt);
 
 	BGE_2DVect speed;   // [px/S]

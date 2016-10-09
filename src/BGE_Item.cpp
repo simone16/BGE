@@ -19,11 +19,12 @@ BGE_Item::~BGE_Item() {}
 
 void BGE_Item::update(float Dt) {
     if (selfDestruct) {
+        //Use health as countdown.
         health -= Dt*getData().selfDestructTimeConv;
-        if (health <= 0) {
-            die();
-        }
     }
+    //Am I dead?
+    BGE_Object::update( Dt);
+    //My speed!
     BGE_Moveable::update( Dt);
 }
 

@@ -14,8 +14,7 @@
 BGE_Engine *BGE_Object::engine = NULL;
 const float BGE_Object::TWO_PI = 6.283185307;
 const float BGE_Object::DEGREE_OVER_RADIANS = 57.29577951;
-//Assumes 25px -> 0.5m
-const float BGE_Object::LITERS_PER_CUBIC_PX = 1/(8*156.25);
+const float BGE_Object::LITERS_PER_CUBIC_PX = 1/(8*156.25); //Assumes 25px -> 0.5m
 BGE_Object::TypeData BGE_Object::dataOf[TOT];
 BGE_Object::MaterialData BGE_Object::dataOfMaterial[static_cast<int>(BGE_Object::Material::TOT)];
 BGE_Object::CreatureData BGE_Object::dataOfCreature[static_cast<int>(BGE_Object::CreatureType::TOT)];
@@ -82,6 +81,11 @@ BGE_Object::~BGE_Object() {
 }
 
 void BGE_Object::update(float Dt) {
+    //Check for health
+    if (health <= 0) {
+        die();
+    }
+    //Message visualisation stuff...
     if (messageTexture != NULL) {
         messageTimer -= Dt;
         if (messageTimer < 0) {
@@ -96,9 +100,6 @@ void BGE_Object::hit(BGE_Object* origin, float energy) {
     printf("%s hit %s\n", origin->getName().c_str(), getName().c_str());
 #endif // DEBUG
 	health -= energy;
-	if (health <= 0) {
-        die();
-	}
 }
 
 void BGE_Object::applyCollision(std::vector<BGE_Object*> &others) {

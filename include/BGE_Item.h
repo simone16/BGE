@@ -16,7 +16,7 @@ class BGE_Item : public BGE_Moveable {
         virtual void interact( BGE_Object * other, BGE_2DVect overlap);
         //Called when this is hit.
         virtual void hit(BGE_Object* origin, float energy);
-        //Used to eliminate object.
+        //Overridden to handle content.
         virtual void die();
         //Tells this item that it is contained in another.
         virtual void setAsContent(bool content);

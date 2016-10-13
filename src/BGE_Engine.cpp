@@ -773,34 +773,38 @@ void BGE_Engine::updateVectors() {
 		}
     }
     toAdd.clear();
-    //Remove elements from all lists.
+    //Remove elements from appropriate lists.
     for (int i=0; i<toRemove.size(); i++) {
 		std::vector<BGE_Object *>::iterator index;
-		index = std::find(creatures.begin(), creatures.end(), toRemove[i]);
-		if (index != creatures.end()) {
-			delete *index;
-			creatures.erase(index);
-			continue;
+		if (toRemove[i]->type == BGE_Object::TILE) {
+            index = std::find(tiles.begin(), tiles.end(), toRemove[i]);
+            if (index != tiles.end()) {
+                delete *index;
+                tiles.erase(index);
+            }
 		}
-		index = std::find(effects.begin(), effects.end(), toRemove[i]);
-		if (index != effects.end()) {
-			delete *index;
-			effects.erase(index);
-			continue;
+		else if (toRemove[i]->type == BGE_Object::PARTICLE) {
+			index = std::find(effects.begin(), effects.end(), toRemove[i]);
+            if (index != effects.end()) {
+                delete *index;
+                effects.erase(index);
+            }
 		}
-		index = std::find(items.begin(), items.end(), toRemove[i]);
-		if (index != items.end()) {
-			delete *index;
-			items.erase(index);
-			continue;
+		else if (toRemove[i]->type == BGE_Object::CREATURE) {
+            index = std::find(creatures.begin(), creatures.end(), toRemove[i]);
+            if (index != creatures.end()) {
+                delete *index;
+                creatures.erase(index);
+            }
 		}
-		index = std::find(tiles.begin(), tiles.end(), toRemove[i]);
-		if (index != tiles.end()) {
-			delete *index;
-			tiles.erase(index);
-			continue;
+		else {
+            index = std::find(items.begin(), items.end(), toRemove[i]);
+            if (index != items.end()) {
+                delete *index;
+                items.erase(index);
+            }
 		}
-        printf("Failed to eliminate: %s\n", toRemove[i]->getName().c_str());
+        printf("Failed to remove object.\n");
     }
     toRemove.clear();
 }

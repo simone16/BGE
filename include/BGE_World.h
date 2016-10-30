@@ -9,7 +9,7 @@ class BGE_Engine;
 class BGE_World {
     public:
         static BGE_Engine *engine;
-        static const int CHUNK_SIZE = 50;
+        static const int CHUNK_SIZE = 10;
         static const int PIECE_SIZE = 3;
         static const int PIECES = 14;
 
@@ -35,14 +35,17 @@ class BGE_World {
                         uint8_t pieces [CHUNK_SIZE*CHUNK_SIZE];
         };
 
-        uint16_t rotatePiece( uint16_t piece);
-        //Gives a score from 0 to 8 based on how well the piece suits the given location.
+        int rotatePiece( int piece);
+        //Gives a score from 0 to 12 based on how well the piece suits the given location.
         int overlapping( uint8_t piece, Chunk *chunk, int x, int y );
         void addRandomPiece( Chunk *chunk, int x, int y);
         void optimisePiece( Chunk *chunk, int x, int y);
         void printPiece(uint8_t piece);
 
-        uint16_t pieces[PIECES];
+        //Returns NULL if no chunk is found.
+        Chunk* getChunk(int x, int y);
+
+        int pieces[PIECES];
         std::vector<Chunk*> chunks;
     private:
 };

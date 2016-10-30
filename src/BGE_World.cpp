@@ -67,24 +67,33 @@ void BGE_World::generateChunk(int x, int y) {
 }
 
 void BGE_World::loadChunk(int x, int y) {
-    //Load tiles
-    for (int j=0; j<CHUNK_SIZE; j++) {
-        for (int i=0; i<CHUNK_SIZE; i++) {
-            for (int index=0; index < PIECE_SIZE*PIECE_SIZE; index++) {
-                if ((pieces[chunks[0]->getPiece(i, j)] & (0b1 << index)) > 0) {
-                    BGE_Tile *tile = new BGE_Tile( BGE_Object::Material::PINEWOOD );
-                    tile->position.x = (i*PIECE_SIZE + (index % PIECE_SIZE))*BGE_Tile::SIDE;
-                    tile->position.y = (j*PIECE_SIZE + (index / PIECE_SIZE))*BGE_Tile::SIDE;
-                    engine->add(tile);
+    Chunk *chunk = getChunk(x,y);
+    int x0 = x*CHUNK_SIZE*PIECE_SIZE;
+    int y0 = y*CHUNK_SIZE*PIECE_SIZE;
+
+    if (chunk != NULL) {
+        //Load tiles
+        for (int j=0; j<CHUNK_SIZE; j++) {
+            for (int i=0; i<CHUNK_SIZE; i++) {
+                for (int index=0; index < PIECE_SIZE*PIECE_SIZE; index++) {
+                    if ((pieces[chunk->getPiece(i, j)] & (0b1 << index)) > 0) {
+                        BGE_Tile *tile = new BGE_Tile( BGE_Object::Material::PINEWOOD );
+                        tile->position.x = (i*PIECE_SIZE + (index % PIECE_SIZE) + x0)*BGE_Tile::SIDE;
+                        tile->position.y = (j*PIECE_SIZE + (index / PIECE_SIZE) + y0)*BGE_Tile::SIDE;
+                        engine->add(tile);
+                    }
                 }
             }
         }
     }
+    else {
+        printf("Error! request for chunk (%i, %i): not found.\n");
+    }
 }
 
-uint16_t BGE_World::rotatePiece(uint16_t piece) {
-    uint16_t result = 0;
-    uint16_t mask = 0b1;
+int BGE_World::rotatePiece(int piece) {
+    int result = 0;
+    int mask = 0b1;
     for (int index=0; index < PIECE_SIZE*PIECE_SIZE; index++) {
         if ((piece & mask) > 0) {
             result += (0b1 << ((index % PIECE_SIZE)*PIECE_SIZE + (PIECE_SIZE-1 - (index/PIECE_SIZE))));
@@ -95,42 +104,92 @@ uint16_t BGE_World::rotatePiece(uint16_t piece) {
 }
 
 int BGE_World::overlapping(uint8_t piece, Chunk* chunk, int x, int y) {
+    //Initialise the score
     int result = 0;
 
+    //Initialise the nearby pieces
+    int center, left, right, above, below;
+    center = pieces[piece];
+    if (x == 0) {
+        Chunk *leftChunk = getChunk(chunk->x-1, chunk->y);
+        if (leftChunk != NULL) {
+            left = pieces[leftChunk->getPiece(CHUNK_SIZE-1, y)];
+        }
+        else {
+            left = 0;
+        }
+    }
+    else {
+        left = pieces[chunk->getPiece(x-1, y)];
+    }
+    if (x == CHUNK_SIZE-1) {
+        Chunk *rightChunk = getChunk(chunk->x+1, chunk->y);
+        if (rightChunk != NULL) {
+            right = pieces[rightChunk->getPiece(0, y)];
+        }
+        else {
+            right = 0;
+        }
+    }
+    else {
+        right = pieces[chunk->getPiece(x+1, y)];
+    }
+    if (y == 0) {
+        Chunk *aboveChunk = getChunk(chunk->x, chunk->y-1);
+        if (aboveChunk != NULL) {
+            above = pieces[aboveChunk->getPiece(x, CHUNK_SIZE-1)];
+        }
+        else {
+            above = 0;
+        }
+    }
+    else {
+        above = pieces[chunk->getPiece(x, y-1)];
+    }
+    if (y == CHUNK_SIZE-1) {
+        Chunk *belowChunk = getChunk(chunk->x, chunk->y+1);
+        if (belowChunk != NULL) {
+            below = pieces[belowChunk->getPiece(x, 0)];
+        }
+        else {
+            below = 0;
+        }
+    }
+    else {
+        below = pieces[chunk->getPiece(x, y+1)];
+    }
+
+    //Evaluate overlap
     for (int index=0; index<PIECE_SIZE; index++) {
         //Left overlap
         int thisMask = (0b1 << (index*PIECE_SIZE));                     //Start of rows
         int otherMask = (0b1 << (index*PIECE_SIZE + PIECE_SIZE -1));    //end of rows
-        if ((x != 0) &&
-            (((pieces[chunk->getPiece(x-1, y)] & otherMask) > 0 && (pieces[piece] & thisMask) > 0) ||
-            ((pieces[chunk->getPiece(x-1, y)] & otherMask) == 0 && (pieces[piece] & thisMask) == 0))) {
+        if (((left & otherMask) > 0 && (center & thisMask) > 0) ||
+            ((left & otherMask) == 0 && (center & thisMask) == 0)) {
             result += 1;
         }
 
         //Right overlap
         thisMask = (0b1 << (index*PIECE_SIZE + PIECE_SIZE -1));//end of rows
         otherMask = (0b1 << (index*PIECE_SIZE));                //start of rows
-        if ((x != CHUNK_SIZE-1) &&
-            (((pieces[chunk->getPiece(x+1, y)] & otherMask) > 0 && (pieces[piece] & thisMask) > 0) ||
-            ((pieces[chunk->getPiece(x+1, y)] & otherMask) == 0 && (pieces[piece] & thisMask) == 0))) {
+        if (((right & otherMask) > 0 && (center & thisMask) > 0) ||
+            ((right & otherMask) == 0 && (center & thisMask) == 0)) {
             result += 1;
         }
 
         //Below overlap
         thisMask = (0b1 << ((PIECE_SIZE-1)*PIECE_SIZE + index));//last row
         otherMask = (0b1 << (index));                           //first row
-        if ((y != CHUNK_SIZE-1) &&
-            (((pieces[chunk->getPiece(x, y+1)] & otherMask) > 0 && (pieces[piece] & thisMask) > 0) ||
-            ((pieces[chunk->getPiece(x, y+1)] & otherMask) == 0 && (pieces[piece] & thisMask) == 0))) {
+        if (((below & otherMask) > 0 && (center & thisMask) > 0) ||
+            ((below & otherMask) == 0 && (center & thisMask) == 0)) {
             result += 1;
         }
 
         //Above overlap
         thisMask = (0b1 << (index));                            //first row
         otherMask = (0b1 << ((PIECE_SIZE-1)*PIECE_SIZE + index));//last row
-        if ((y != 0) &&
-            (((pieces[chunk->getPiece(x, y-1)] & otherMask) > 0 && (pieces[piece] & thisMask) > 0) ||
-            ((pieces[chunk->getPiece(x, y-1)] & otherMask) == 0 && (pieces[piece] & thisMask) == 0))) {
+        if (((above & otherMask) > 0 && (center & thisMask) > 0) ||
+            ((above & otherMask) == 0 && (center & thisMask) == 0)) {
             result += 1;
         }
     }
@@ -186,6 +245,15 @@ void BGE_World::printPiece(uint8_t piece) {
         printf("\n");
     }
     printf("\n");
+}
+
+BGE_World::Chunk* BGE_World::getChunk(int x, int y) {
+    for (std::vector<Chunk*>::iterator it = chunks.begin(); it != chunks.end(); it++) {
+        if ((*it)->x == x && (*it)->y == y) {
+            return (*it);
+        }
+    }
+    return NULL;
 }
 
 BGE_World::Chunk::Chunk() {

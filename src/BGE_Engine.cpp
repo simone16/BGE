@@ -290,6 +290,8 @@ bool BGE_Engine::load() {
     BGE_World world;
     world.generateChunk(0,0);
     world.loadChunk(0,0);
+    world.generateChunk(1,0);
+    world.loadChunk(1,0);
 
     //A DEFAULT LEVEL
 //    //load building

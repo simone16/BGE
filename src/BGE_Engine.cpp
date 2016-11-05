@@ -281,7 +281,12 @@ bool BGE_Engine::load() {
         itemFxs.push_back(chunk);
 	}
 
-	//Load level.
+	return success;
+}
+
+void BGE_Engine::newWorld() {
+    printf("Generating new world.\n");
+
 	//Load player.
     player = new BGE_Player;
     player->position.x = 50;
@@ -486,8 +491,6 @@ bool BGE_Engine::load() {
 //        items.push_back(item2);
 //        item->add(item2);
 //    }
-
-	return success;
 }
 
 void BGE_Engine::start() {
@@ -655,6 +658,8 @@ void BGE_Engine::start() {
 		//Update screen
 		SDL_RenderPresent( BGE_Texture::renderer );
 	}
+
+    writeFile("test.dat");
 }
 
 void BGE_Engine::close() {
@@ -819,6 +824,85 @@ void BGE_Engine::updateVectors() {
         printf("Failed to remove object.\n");
     }
     toRemove.clear();
+}
+
+void BGE_Engine::loadFile(std::string filename) {
+    printf("Loading from '%s'.\n", filename.c_str());
+
+    //Open file in read binary mode
+    SDL_RWops *source = SDL_RWFromFile( filename.c_str(), "rb");
+    //Check file is valid
+    if (source == NULL) {
+        printf("Error: cannot open (read) file '%s': %s\n", filename.c_str(), SDL_GetError());
+    }
+    else {
+        //Read number of tiles
+        int tilesNum = 0;
+        if (SDL_RWread(source, &tilesNum, sizeof(tilesNum), 1) != 1) {
+            printf("Error: cannot read from file '%s': %s\n", filename.c_str(), SDL_GetError());
+        }
+        else {
+            //Read tiles data
+            BGE_Tile::Serialized tilesData [tilesNum];
+            if ( SDL_RWread(source, tilesData, sizeof(tilesData[0]), tilesNum) != tilesNum) {
+                printf("Error: cannot read from file '%s': %s\n", filename.c_str(), SDL_GetError());
+            }
+            else {
+                //Deserialize tiles
+                int currentSize = tiles.size();
+                tiles.resize( currentSize + tilesNum, NULL);
+                for (int i=0; i<tilesNum; i++) {
+                    BGE_Tile *newTile = new BGE_Tile( tilesData[i]);
+                    tiles[currentSize + i] = newTile;
+                }
+            }
+        }
+        //Close file
+        if ( SDL_RWclose(source) != 0) {
+            printf("Error upon closing file '%s': %s\n", filename.c_str(), SDL_GetError());
+        }
+        //TODO LOAD PLAYER FROM FILE AS WELL
+            //Load player.
+        player = new BGE_Player;
+        player->position.x = 50;
+        player->position.y = 50;
+    }
+}
+
+void BGE_Engine::writeFile(std::string filename) {
+    printf("Saving to '%s'.", filename.c_str());
+
+    //Open file in write binary mode.
+    SDL_RWops* dest = SDL_RWFromFile( filename.c_str(), "wb");
+    //Check file is valid
+    if (dest == NULL) {
+        printf("Error: cannot open (write) file '%s': %s\n", filename.c_str(), SDL_GetError());
+    }
+    else {
+        //Serialize tiles
+        int tilesNum = tiles.size();
+        BGE_Tile::Serialized serializedTiles [tilesNum];
+        for (int i=0; i<tilesNum; i++) {
+            serializedTiles[i] = (static_cast<BGE_Tile*>(tiles[i]))->serialize();
+        }
+        //Write number of tiles
+        int written = SDL_RWwrite(dest, &tilesNum, sizeof(tilesNum), 1);
+        if ( written != 1) {
+            printf("Error: cannot write to '%s': %s\n", filename.c_str(), SDL_GetError());
+        }
+        else {
+            //Write tiles data
+            written = SDL_RWwrite(dest, serializedTiles, sizeof(serializedTiles[0]), tilesNum);
+            if ( written != tilesNum) {
+                printf("Error: cannot write to '%s': %s\n", filename.c_str(), SDL_GetError());
+            }
+        }
+        //Close file
+        if ( SDL_RWclose(dest) != 0) {
+            printf("Error upon closing file '%s': %s\n", filename.c_str(), SDL_GetError());
+            return;
+        }
+    }
 }
 
 void BGE_Engine::playCreature() {

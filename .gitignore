@@ -5,3 +5,5 @@ BGE
 *.o
 obj/**
 bin/**
+*.dat
+

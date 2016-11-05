@@ -233,7 +233,6 @@ bool BGE_Texture::loadTiles() {
 		SDL_Color color = BGE_Tile::getTileColor(mat);
         source.x = width*BGE_Tile::getMaskIndex(mat);
         dest.x = width*mat;
-        printf("mask index: %i, color: %i,%i,%i\n", BGE_Tile::getMaskIndex(mat), color.r, color.g, color.b);
         if (BGE_Tile::getMaskIndex(mat) == 3) {
             source.x = 0;
             SDL_SetSurfaceColorMod(masks, color.r,color.g,color.b);

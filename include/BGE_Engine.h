@@ -40,10 +40,13 @@ class BGE_Engine {
 		//Preps SDL for usage.
 		bool init();
 
-		//Reads external resources (text, images and audio) and level.
+		//Reads external resources (text, images and audio).
 		bool load();
 
-		//Executes the game itself.
+		//Generates a new level.
+		void newWorld();
+
+		//Executes the game cycle.
 		void start();
 
 		//Once the user quits the game, this function has to be called.
@@ -70,6 +73,12 @@ class BGE_Engine {
         void remove(BGE_Object * object);
         //Applies the changes queued with add and remove.
         void updateVectors();
+
+        //File IO:
+        //Loads the game described in the file.
+        void loadFile( std::string filename);
+        //Writes a file with the description of the current game.
+        void writeFile( std::string filename);
 
         //Functions for random numbers generation.
 		int getRandomInt(int min, int max);
